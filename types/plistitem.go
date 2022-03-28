@@ -17,3 +17,32 @@ type PListItem struct {
 	WFID             string       `json:"wfid"`
 	Channel          string       `json:"channel"`
 }
+
+//HasChildrenType HasChildrenType
+func (n *PListItem) HasChildrenType(typeName string) bool {
+	return len(FindAllByItemtype(n, typeName)) > 0
+}
+
+//FindAllByItemtype FindAllByItemtype
+func FindAllByItemtype(root *PListItem, objtype string) []*PListItem {
+	result := make([]*PListItem, 0)
+	queue := make([]*PListItem, 0)
+	queue = append(queue, root)
+	for len(queue) > 0 {
+		nextUp := queue[0]
+		queue = queue[1:]
+		if nextUp.Type == objtype {
+			result = append(result, nextUp)
+		}
+		if len(nextUp.Children) > 0 {
+			for _, child := range nextUp.Children {
+				results2 := FindAllByItemtype(child, objtype)
+				if len(results2) > 0 {
+					result = append(result, results2...)
+				}
+
+			}
+		}
+	}
+	return result
+}

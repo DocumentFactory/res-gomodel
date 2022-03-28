@@ -73,3 +73,30 @@ type ServiceNameData struct {
 	Service   string `json:"service"`
 	Component string `json:"component"`
 }
+
+func FindAllByNodetype(root *Nodes, objtype string) []*Nodes {
+	result := make([]*Nodes, 0)
+	queue := make([]*Nodes, 0)
+	queue = append(queue, root)
+	for len(queue) > 0 {
+		nextUp := queue[0]
+		queue = queue[1:]
+		if nextUp.Nodetype == objtype {
+			result = append(result, nextUp)
+		}
+		if len(nextUp.Children) > 0 {
+			for _, child := range nextUp.Children {
+				results2 := FindAllByNodetype(child, objtype)
+				if len(results2) > 0 {
+					result = append(result, results2...)
+				}
+			}
+		}
+	}
+	return result
+}
+
+//HasChildrenType HasChildrenType
+func (n *Nodes) HasChildrenType(typeName string) bool {
+	return len(FindAllByNodetype(n, typeName)) > 0
+}
