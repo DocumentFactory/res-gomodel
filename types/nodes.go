@@ -2,14 +2,19 @@ package types
 
 //Nodes Nodes
 type Nodes struct {
-	ID       string      `json:"id"`
-	Name     string      `json:"name"`
-	Extdata  TypeExtData `json:"extdata"`
-	Deleted  bool        `json:"deleted"`
-	ParentID string      `json:"parent_id"`
-	Order    int         `json:"norder"`
-	Nodetype string      `json:"nodetype_id"`
-	Children []*Nodes    `json:"children"`
+	ID          string      `json:"id"`
+	Name        string      `json:"name"`
+	Extdata     TypeExtData `json:"extdata"`
+	Deleted     bool        `json:"deleted"`
+	ParentID    string      `json:"parent_id"`
+	Order       int         `json:"norder"`
+	Nodetype    string      `json:"nodetype_id"`
+	Depth       int         `json:"depth"`
+	RootUrl     string      `json:"rooturl"`
+	SiteUrl     string      `json:"siteurl"`
+	RelativeUrl string      `json:"relativeurl"`
+	Ancestors   []*Nodes    `json:"ancestors"`
+	Children    []*Nodes    `json:"children"`
 }
 
 //TypeExtData Extdata structure
