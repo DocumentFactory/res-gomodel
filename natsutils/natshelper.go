@@ -60,6 +60,15 @@ func (nh *NatsHelper) AddStream(name string) error {
 	return nil
 }
 
+func (nh *NatsHelper) Broadcast(subject string, payload interface{}) error {
+
+	messagejson, _ := json.Marshal(payload)
+
+	_, err := nh.js.Publish(subject, messagejson)
+
+	return err
+}
+
 func (nh *NatsHelper) Publish(subject string, payload interface{}) (string, error) {
 
 	id := uuid.New().String()
