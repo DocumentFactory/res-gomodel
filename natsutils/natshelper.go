@@ -9,7 +9,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 	"github.com/pnocera/res-gomodel/config"
-	"github.com/pnocera/res-gomodel/types"
 )
 
 //Config struct using viper
@@ -64,13 +63,11 @@ func (nh *NatsHelper) AddStream(name string) error {
 func (nh *NatsHelper) Publish(subject string, payload interface{}) (string, error) {
 
 	id := uuid.New().String()
-	message := types.Message{
-		ID:      id,
-		Payload: payload,
-	}
-	messagejson, _ := json.Marshal(message)
 
-	_, err := nh.js.Publish(subject, messagejson)
+	messagejson, _ := json.Marshal(payload)
+	dedupKey := nats.MsgId(id)
+
+	_, err := nh.js.Publish(subject, messagejson, dedupKey)
 
 	if err != nil {
 		return "", err
