@@ -7,4 +7,5 @@ type FeedbackPayload struct {
 	Docs   []*PListItem `json:"docs"`
 	Ok     bool         `json:"ok"`
 	ErrMsg string       `json:"errmsg"`
+	WfStep string       `json:"wfstep"`
 }
