@@ -9,4 +9,5 @@ type FeedbackPayload struct {
 	ErrMsg   string       `json:"errmsg"`
 	WfStep   string       `json:"wfstep"`
 	WfAction string       `json:"wfaction"`
+	Elapsed  int          `json:"elapsed"`
 }
