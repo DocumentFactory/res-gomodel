@@ -14,6 +14,7 @@ import (
 //Config struct using viper
 type NatsHelper struct {
 	conf *config.Config
+	nc   *nats.Conn
 	js   nats.JetStreamContext
 	subs []*nats.Subscription
 }
@@ -34,7 +35,8 @@ func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
 	if err != nil {
 		return nil, err
 	}
-	//defer nc.Close()
+
+	c.nc = nc
 
 	js, err := nc.JetStream()
 	if err != nil {
@@ -69,14 +71,17 @@ func (nh *NatsHelper) Broadcast(subject string, payload interface{}) error {
 	return err
 }
 
+func (nh *NatsHelper) Close() {
+	nh.nc.Close()
+}
+
 func (nh *NatsHelper) Publish(subject string, payload interface{}) (string, error) {
 
 	id := uuid.New().String()
 
 	messagejson, _ := json.Marshal(payload)
-	dedupKey := nats.MsgId(id)
 
-	_, err := nh.js.Publish(subject, messagejson, dedupKey)
+	_, err := nh.js.Publish(subject, messagejson, nats.MsgId(id), nats.AckWait(1*time.Second))
 
 	if err != nil {
 		return "", err
