@@ -48,11 +48,11 @@ func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
 	return &c, nil
 }
 
-func (nh *NatsHelper) AddStream(name string) error {
+func (nh *NatsHelper) AddStream(name string, maxage time.Duration) error {
 	jsinfo, _ := nh.js.AddStream(&nats.StreamConfig{
 		Name:     name,
 		Subjects: []string{name + ".>"},
-		MaxAge:   32 * time.Minute,
+		MaxAge:   maxage,
 	})
 
 	bytes, _ := json.MarshalIndent(jsinfo, "", " ")
