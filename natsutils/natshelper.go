@@ -114,7 +114,7 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 		go func() {
 			for {
 				msgs, _ := sub.Fetch(poolsize, nats.MaxWait(time.Second))
-
+				log.Printf("Got %d messages to process\n", len(msgs))
 				for _, msg := range msgs {
 					msg.Ack()
 					// meta, _ := msg.Metadata()
@@ -129,6 +129,7 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 						log.Printf("Error processing message %v", err)
 					}
 				}
+				log.Printf("Processed %d messages. Going for another round trip...\n", len(msgs))
 			}
 
 		}()
