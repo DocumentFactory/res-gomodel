@@ -45,15 +45,23 @@ func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
 
 	c.js = js
 
+	c.addStream("feedback", 30*time.Second)
+	c.addStream("tasks", 32*time.Minute)
+
 	return &c, nil
 }
 
-func (nh *NatsHelper) AddStream(name string, maxage time.Duration) error {
-	jsinfo, _ := nh.js.AddStream(&nats.StreamConfig{
+func (nh *NatsHelper) addStream(name string, maxage time.Duration) error {
+	conf := &nats.StreamConfig{
 		Name:     name,
 		Subjects: []string{name + ".>"},
 		MaxAge:   maxage,
-	})
+	}
+	jsinfo, err := nh.js.AddStream(conf)
+
+	if err != nil {
+		jsinfo, err = nh.js.UpdateStream(conf)
+	}
 
 	bytes, _ := json.MarshalIndent(jsinfo, "", " ")
 	log.Println("Initialized stream  " + name)
