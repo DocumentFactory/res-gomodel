@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -113,22 +114,22 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 
 		go func() {
 			for {
-				msgs, _ := sub.Fetch(poolsize, nats.MaxWait(time.Second))
+				var wg sync.WaitGroup
+				msgs, _ := sub.Fetch(poolsize, nats.MaxWait(5*time.Second))
 				log.Printf("Got %d messages to process\n", len(msgs))
+				numDigesters := len(msgs)
+				wg.Add(numDigesters)
 				for _, msg := range msgs {
-					msg.Ack()
-					// meta, _ := msg.Metadata()
-					// go log.Printf(
-					// 	"got msg %d/%d on subject %s",
-					// 	meta.Sequence.Stream,
-					// 	meta.Sequence.Consumer,
-					// 	msg.Subject,
-					// )
-					err = fn(context.Background(), msg)
-					if err != nil {
-						log.Printf("Error processing message %v", err)
-					}
+					go func(m *nats.Msg) {
+						m.Ack()
+						err = fn(context.Background(), m)
+						if err != nil {
+							log.Printf("Error processing message %v", err)
+						}
+						wg.Done()
+					}(msg)
 				}
+				wg.Wait()
 				log.Printf("Processed %d messages. Going for another round trip...\n", len(msgs))
 			}
 
