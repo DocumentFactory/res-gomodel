@@ -12,7 +12,6 @@ import (
 	"github.com/pnocera/res-gomodel/config"
 )
 
-//Config struct using viper
 type NatsHelper struct {
 	conf *config.Config
 	nc   *nats.Conn
@@ -22,7 +21,7 @@ type NatsHelper struct {
 
 type SubscribeInvocationHandler func(ctx context.Context, msg *nats.Msg) error
 
-//New Create a new config
+//New Create a new NatsHelper
 func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
 	c := NatsHelper{
 		conf: conf,
@@ -81,6 +80,7 @@ func (nh *NatsHelper) Broadcast(subject string, payload interface{}) error {
 }
 
 func (nh *NatsHelper) Close() {
+	nh.nc.Flush()
 	nh.nc.Close()
 }
 
@@ -112,16 +112,22 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 			return err
 		}
 
-		go func() {
-			for {
-				var wg sync.WaitGroup
-				msgs, _ := sub.Fetch(poolsize, nats.MaxWait(5*time.Second))
-				log.Printf("Got %d messages to process\n", len(msgs))
+		go func(subscription *nats.Subscription) {
+			for subscription.IsValid() {
+
+				msgs, _ := subscription.Fetch(poolsize, nats.MaxWait(5*time.Second))
+
 				numDigesters := len(msgs)
+				if numDigesters == 0 {
+					continue
+				}
+
+				var wg sync.WaitGroup
+				log.Printf("Got %d messages to process\n", numDigesters)
 				wg.Add(numDigesters)
 				for _, msg := range msgs {
+					msg.Ack()
 					go func(m *nats.Msg) {
-						m.Ack()
 						err = fn(context.Background(), m)
 						if err != nil {
 							log.Printf("Error processing message %v", err)
@@ -133,7 +139,7 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 				log.Printf("Processed %d messages. Going for another round trip...\n", len(msgs))
 			}
 
-		}()
+		}(sub)
 
 	} else {
 		sub, err = nh.js.Subscribe(subject, func(msg *nats.Msg) {
