@@ -15,7 +15,7 @@ type PListItem struct {
 	FileName         string       `json:"FileName"`
 	TmpFolderID      string       `json:"tmpFolderID"`
 	WFID             string       `json:"wfid"`
-	Channel          string       `json:"channel"`
+	UploadUrl        string       `json:"uploadurl"`
 }
 
 //HasChildrenType HasChildrenType
