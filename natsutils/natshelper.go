@@ -47,6 +47,7 @@ func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
 
 	c.addStream("feedback", 30*time.Second)
 	c.addStream("tasks", 32*time.Minute)
+	c.addStream("cancel", 30*time.Second)
 
 	return &c, nil
 }
