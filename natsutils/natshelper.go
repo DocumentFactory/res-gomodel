@@ -40,7 +40,7 @@ func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
 
 	c.nc = nc
 
-	js, err := nc.JetStream()
+	js, err := nc.JetStream(nats.PublishAsyncMaxPending(256))
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,12 @@ func (nh *NatsHelper) Broadcast(subject string, payload interface{}) error {
 
 	messagejson, _ := json.Marshal(payload)
 
-	_, err := nh.js.Publish(subject, messagejson)
+	_, err := nh.js.PublishAsync(subject, messagejson)
+	select {
+	case <-nh.js.PublishAsyncComplete():
+	case <-time.After(5 * time.Second):
+		log.Println("Did not resolve in time")
+	}
 
 	return err
 }
@@ -93,11 +98,17 @@ func (nh *NatsHelper) Publish(subject string, payload interface{}) (string, erro
 
 	messagejson, _ := json.Marshal(payload)
 
-	_, err := nh.js.Publish(subject, messagejson, nats.MsgId(id), nats.AckWait(1*time.Second))
-
-	if err != nil {
-		return "", err
+	nh.js.PublishAsync(subject, messagejson, nats.MsgId(id))
+	select {
+	case <-nh.js.PublishAsyncComplete():
+	case <-time.After(5 * time.Second):
+		log.Println("Did not resolve in time")
 	}
+	// _, err := nh.js.Publish(subject, messagejson, nats.MsgId(id), nats.AckWait(1*time.Second))
+
+	// if err != nil {
+	// 	return "", err
+	// }
 
 	return id, nil
 }
