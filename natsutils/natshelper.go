@@ -21,6 +21,8 @@ type NatsHelper struct {
 
 type SubscribeInvocationHandler func(ctx context.Context, msg *nats.Msg) error
 
+type CancelWorkflowHandler func(ctx context.Context, msg *nats.Msg) bool
+
 //New Create a new NatsHelper
 func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
 	c := NatsHelper{
@@ -100,7 +102,7 @@ func (nh *NatsHelper) Publish(subject string, payload interface{}) (string, erro
 	return id, nil
 }
 
-func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject string, fn SubscribeInvocationHandler) error {
+func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject string, fn SubscribeInvocationHandler, chk CancelWorkflowHandler) error {
 	var sub *nats.Subscription
 	var err error
 	if poolsize < 1 {
@@ -116,7 +118,7 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 		go func(subscription *nats.Subscription) {
 			for subscription.IsValid() {
 
-				msgs, _ := subscription.Fetch(poolsize, nats.MaxWait(5*time.Second))
+				msgs, _ := subscription.Fetch(poolsize, nats.MaxWait(1*time.Second))
 
 				numDigesters := len(msgs)
 				if numDigesters == 0 {
@@ -129,10 +131,14 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 				for _, msg := range msgs {
 					msg.Ack()
 					go func(m *nats.Msg) {
-						err = fn(context.Background(), m)
-						if err != nil {
-							log.Printf("Error processing message %v", err)
+						ctx := context.Background()
+						if !chk(ctx, m) {
+							err = fn(ctx, m)
+							if err != nil {
+								log.Printf("Error processing message %v", err)
+							}
 						}
+
 						wg.Done()
 					}(msg)
 				}
@@ -145,9 +151,12 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 	} else {
 		sub, err = nh.js.Subscribe(subject, func(msg *nats.Msg) {
 			msg.Ack()
-			err = fn(context.Background(), msg)
-			if err != nil {
-				log.Printf("Error processing message %v", err)
+			ctx := context.Background()
+			if !chk(ctx, msg) {
+				err = fn(ctx, msg)
+				if err != nil {
+					log.Printf("Error processing message %v", err)
+				}
 			}
 		})
 		if err != nil {
