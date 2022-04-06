@@ -113,7 +113,7 @@ func (nh *NatsHelper) Publish(subject string, payload interface{}) (string, erro
 	return id, nil
 }
 
-func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject string, fn SubscribeInvocationHandler, chk CancelWorkflowHandler) error {
+func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject string, fn SubscribeInvocationHandler) error {
 	var sub *nats.Subscription
 	var err error
 	if poolsize < 1 {
@@ -143,11 +143,9 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 					msg.Ack()
 					go func(m *nats.Msg) {
 						ctx := context.Background()
-						if chk == nil || !chk(ctx, m) {
-							err = fn(ctx, m)
-							if err != nil {
-								log.Printf("Error processing message %v", err)
-							}
+						err = fn(ctx, m)
+						if err != nil {
+							log.Printf("Error processing message %v", err)
 						}
 
 						wg.Done()
@@ -163,11 +161,9 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 		sub, err = nh.js.Subscribe(subject, func(msg *nats.Msg) {
 			msg.Ack()
 			ctx := context.Background()
-			if chk == nil || !chk(ctx, msg) {
-				err = fn(ctx, msg)
-				if err != nil {
-					log.Printf("Error processing message %v", err)
-				}
+			err = fn(ctx, msg)
+			if err != nil {
+				log.Printf("Error processing message %v", err)
 			}
 		})
 		if err != nil {
