@@ -132,7 +132,7 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 					msg.Ack()
 					go func(m *nats.Msg) {
 						ctx := context.Background()
-						if !chk(ctx, m) {
+						if chk == nil || !chk(ctx, m) {
 							err = fn(ctx, m)
 							if err != nil {
 								log.Printf("Error processing message %v", err)
@@ -152,7 +152,7 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 		sub, err = nh.js.Subscribe(subject, func(msg *nats.Msg) {
 			msg.Ack()
 			ctx := context.Background()
-			if !chk(ctx, msg) {
+			if chk == nil || !chk(ctx, msg) {
 				err = fn(ctx, msg)
 				if err != nil {
 					log.Printf("Error processing message %v", err)
