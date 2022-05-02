@@ -41,6 +41,7 @@ const (
 	Rbacsvc    = "rbacsvc"
 	Compapi    = "compapisvc"
 	Qsvc       = "qsvc"
+	SecretSvc  = "gosecret"
 )
 
 //actions names
