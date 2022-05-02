@@ -4,6 +4,6 @@ go mod tidy
 
 push changes to github
 
-git tag v0.1.34
-git push origin v0.1.34
-go list -m github.com/pnocera/res-gomodel@v0.1.34
+git tag v0.1.35
+git push origin v0.1.35
+go list -m github.com/pnocera/res-gomodel@v0.1.35

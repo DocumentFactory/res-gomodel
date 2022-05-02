@@ -3,6 +3,8 @@ package httputils
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -48,6 +50,32 @@ func (ul *DaprHelper) GetExtension(ctx context.Context, Mimetype string) (string
 
 	return string(response), nil
 
+}
+
+func (ul *DaprHelper) GetSecret(ctx context.Context, nodetype string, secretid string) (map[string]interface{}, error) {
+	secretbytes, err := ul.Post(ctx, enums.SecretSvc, "secretv1", types.SecretData{
+		Action:     "read",
+		SecretPath: fmt.Sprintf("v1/%s/%s", ul.conf.DFEnv(), nodetype),
+		SecretID:   secretid,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var secretresp types.SecretData
+
+	err = json.Unmarshal(secretbytes, &secretresp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !secretresp.Ok {
+		return nil, errors.New(secretresp.ErrMsg)
+	}
+
+	return secretresp.SecretValue, nil
 }
 
 func (ul *DaprHelper) GetService(ctx context.Context, filename string) (string, error) {
