@@ -1,6 +1,7 @@
 package types
 
 type BrowseRequest struct {
+	Connector  Nodes      `json:"connector"`  // The connector node
 	AuthConfig AuthConfig `json:"authconfig"` // The AuthConfig configuration
 	Node       Nodes      `json:"node"`       // The node to browse
 	WhereName  string     `json:"where_name"` // The  filter name contains
