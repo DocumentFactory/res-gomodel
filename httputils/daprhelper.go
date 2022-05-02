@@ -52,6 +52,10 @@ func (ul *DaprHelper) GetExtension(ctx context.Context, Mimetype string) (string
 
 }
 
+func (ul *DaprHelper) GetNodeSecret(ctx context.Context, node types.Nodes) (map[string]interface{}, error) {
+	return ul.GetSecret(ctx, node.Nodetype, node.ID)
+}
+
 func (ul *DaprHelper) GetSecret(ctx context.Context, nodetype string, secretid string) (map[string]interface{}, error) {
 	secretbytes, err := ul.Post(ctx, enums.SecretSvc, "secretv1", types.SecretData{
 		Action:     "read",
