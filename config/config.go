@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -128,4 +129,8 @@ func (c *Config) NatsURL() string {
 func (c *Config) NatsNKeyPath() string {
 	return c.GetString("NATS_NKEY_PATH", "/etc/nkey/nkey")
 
+}
+
+func (c *Config) DFEnv() string {
+	return strings.ToLower(c.GetString("DF_ENV", "DEV"))
 }
