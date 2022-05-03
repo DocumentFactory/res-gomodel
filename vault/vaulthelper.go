@@ -50,7 +50,7 @@ func (vh *VaultHelper) Getv1(api string) (map[string]interface{}, error) {
 		}
 	}
 
-	vh.logh.Debug(fmt.Sprintf("%v", secret))
+	vh.logh.Error(fmt.Sprintf("%v", secret))
 
 	return secret.Data, err
 }
