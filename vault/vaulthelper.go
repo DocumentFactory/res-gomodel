@@ -15,22 +15,22 @@ type VaultHelper struct {
 	logh   *logs.LogHelper
 }
 
-func NewVaultHelper(conf *config.Config, vaultaddress string, token string) *VaultHelper {
+func NewVaultHelper(conf *config.Config) *VaultHelper {
 	c := VaultHelper{
 		conf: conf,
 		logh: logs.NewLogHelper(conf),
 	}
 
 	config := vault.DefaultConfig()
-	config.Address = vaultaddress
+	config.Address = conf.VaultHostPort()
 	client, err := vault.NewClient(config)
 	if err != nil {
 		c.logh.Panic(err.Error())
 
 	}
 
-	client.SetToken(token)
-
+	// client.SetToken(token)
+	// client.
 	c.client = client
 
 	return &c
