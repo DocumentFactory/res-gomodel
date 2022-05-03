@@ -1,6 +1,8 @@
 package vault
 
 import (
+	"fmt"
+
 	vault "github.com/hashicorp/vault/api"
 	"github.com/pnocera/res-gomodel/config"
 	"github.com/pnocera/res-gomodel/logs"
@@ -47,6 +49,8 @@ func (vh *VaultHelper) Getv1(api string) (map[string]interface{}, error) {
 			vh.logh.Warn("Warning getting secret ", zap.String("message", sec))
 		}
 	}
+
+	vh.logh.Debug(fmt.Sprintf("%v", secret))
 
 	return secret.Data, err
 }
