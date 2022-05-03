@@ -1,8 +1,6 @@
 package vault
 
 import (
-	"context"
-
 	vault "github.com/hashicorp/vault/api"
 	"github.com/pnocera/res-gomodel/config"
 	"github.com/pnocera/res-gomodel/logs"
@@ -36,7 +34,7 @@ func NewVaultHelper(conf *config.Config) *VaultHelper {
 	return &c
 }
 
-func (vh *VaultHelper) Getv1(ctx context.Context, api string) (map[string]interface{}, error) {
+func (vh *VaultHelper) Getv1(api string) (map[string]interface{}, error) {
 
 	secret, err := vh.client.Logical().Read(api)
 	if err != nil {
@@ -53,7 +51,7 @@ func (vh *VaultHelper) Getv1(ctx context.Context, api string) (map[string]interf
 	return secret.Data, err
 }
 
-func (vh *VaultHelper) Setv1(ctx context.Context, api string, data map[string]interface{}) error {
+func (vh *VaultHelper) Setv1(api string, data map[string]interface{}) error {
 
 	secret, err := vh.client.Logical().Write(api, data)
 	if err != nil {
@@ -70,7 +68,7 @@ func (vh *VaultHelper) Setv1(ctx context.Context, api string, data map[string]in
 	return err
 }
 
-func (vh *VaultHelper) Delete(ctx context.Context, api string) error {
+func (vh *VaultHelper) Delete(api string) error {
 
 	secret, err := vh.client.Logical().Delete(api)
 	if err != nil {
