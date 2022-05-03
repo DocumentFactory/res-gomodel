@@ -134,3 +134,8 @@ func (c *Config) NatsNKeyPath() string {
 func (c *Config) DFEnv() string {
 	return strings.ToLower(c.GetString("DF_ENV", "DEV"))
 }
+
+func (c *Config) VaultHostPort() string {
+	return c.v.GetString("VAULT_HOST_PORT")
+
+}
