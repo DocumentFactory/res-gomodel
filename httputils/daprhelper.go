@@ -26,7 +26,7 @@ func NewDaprHelper(conf *config.Config) *DaprHelper {
 	c := DaprHelper{
 		conf: conf,
 	}
-	client, err := dapr.NewClientWithAddress(conf.DaprHostPort())
+	client, err := dapr.NewClient()
 	if err != nil {
 		panic(err)
 	}
