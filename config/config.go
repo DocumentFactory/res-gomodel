@@ -66,7 +66,7 @@ func (c *Config) APIHostPort() string {
 
 //GetLogLevel The log level
 func (c *Config) GetLogLevel() string {
-	return c.GetString("LOGLEVEL", "error")
+	return strings.ToLower(c.GetString("LOGLEVEL", "error"))
 }
 
 //GetTemporalHost The Temporal host
