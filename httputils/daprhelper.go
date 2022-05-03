@@ -74,7 +74,7 @@ func (ul *DaprHelper) GetNodeSecret(ctx context.Context, node types.Nodes) (map[
 func (ul *DaprHelper) GetSecret(ctx context.Context, nodetype string, secretid string) (map[string]interface{}, error) {
 	secretbytes, err := ul.Post(ctx, enums.SecretSvc, "secretv1", types.SecretData{
 		Action:     "read",
-		SecretPath: fmt.Sprintf("v1/%s/%s", ul.conf.DFEnv(), nodetype),
+		SecretPath: fmt.Sprintf("%s/%s", ul.conf.DFEnv(), nodetype),
 		SecretID:   secretid,
 	})
 

@@ -72,7 +72,7 @@ func (vh *VaultHelper) Delete(api string) error {
 
 	secret, err := vh.client.Logical().Delete(api)
 	if err != nil {
-		vh.logh.Error("Error writing secret ", zap.String("api", api), zap.String("error", err.Error()))
+		vh.logh.Error("Error deleting secret ", zap.String("api", api), zap.String("error", err.Error()))
 		return err
 	}
 
