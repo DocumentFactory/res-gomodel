@@ -26,6 +26,8 @@ func NewLogHelper(conf *config.Config) *LogHelper {
 
 	level := conf.GetLogLevel()
 
+	logger.Info("Log level", zap.String("level", level))
+
 	if level == "none" {
 		c.errors = false
 		c.info = false

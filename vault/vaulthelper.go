@@ -44,7 +44,7 @@ func (vh *VaultHelper) Getv1(api string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	if len(secret.Warnings) > 0 {
+	if secret != nil && len(secret.Warnings) > 0 {
 		for _, sec := range secret.Warnings {
 			vh.logh.Warn("Warning getting secret ", zap.String("message", sec))
 		}
@@ -63,7 +63,7 @@ func (vh *VaultHelper) Setv1(api string, data map[string]interface{}) error {
 		return err
 	}
 
-	if len(secret.Warnings) > 0 {
+	if secret != nil && len(secret.Warnings) > 0 {
 		for _, sec := range secret.Warnings {
 			vh.logh.Warn("Warning writing secret ", zap.String("message", sec))
 		}
@@ -80,7 +80,7 @@ func (vh *VaultHelper) Delete(api string) error {
 		return err
 	}
 
-	if len(secret.Warnings) > 0 {
+	if secret != nil && len(secret.Warnings) > 0 {
 		for _, sec := range secret.Warnings {
 			vh.logh.Warn("Warning deleting secret ", zap.String("message", sec))
 		}
