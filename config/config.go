@@ -7,12 +7,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-//Config struct using viper
+// Config struct using viper
 type Config struct {
 	v *viper.Viper
 }
 
-//New Create a new config
+// New Create a new config
 func New() *Config {
 	c := Config{
 		v: viper.New(),
@@ -40,52 +40,56 @@ func (c *Config) GetInt(name string, defaultvalue int) int {
 	return val
 }
 
+func (c *Config) GetBool(name string) bool {
+	return c.v.GetBool(name)
+}
+
 func (c *Config) GetMaxThreads() int {
 	return c.GetInt("MAX_THREADS", 10)
 }
 
-//GetTempFolder GetTempFolder
+// GetTempFolder GetTempFolder
 func (c *Config) GetTempFolder() string {
 	return c.GetString("TEMPFOLDER", "/temp")
 }
 
-//GetAPIPort gets the main API port
+// GetAPIPort gets the main API port
 func (c *Config) GetAPIPort() int {
 	return c.GetInt("API_PORT", 30507)
 }
 
-//GetAPIHost gets the main API host
+// GetAPIHost gets the main API host
 func (c *Config) GetAPIHost() string {
 	return c.GetString("API_HOST", "0.0.0.0")
 }
 
-//APIHostPort The API host:port
+// APIHostPort The API host:port
 func (c *Config) APIHostPort() string {
 	return fmt.Sprintf("%s:%d", c.GetAPIHost(), c.GetAPIPort())
 }
 
-//GetLogLevel The log level
+// GetLogLevel The log level
 func (c *Config) GetLogLevel() string {
 	return strings.ToLower(c.GetString("LOGLEVEL", "error"))
 }
 
-//GetTemporalHost The Temporal host
+// GetTemporalHost The Temporal host
 func (c *Config) GetTemporalHost() string {
 	return c.v.GetString("TEMPORAL_HOST")
 }
 
-//GetTemporalPort The Temporal Port
+// GetTemporalPort The Temporal Port
 func (c *Config) GetTemporalPort() int64 {
 	return c.v.GetInt64("TEMPORAL_PORT")
 }
 
-//TemporalHostPort Temporal Host:Port
+// TemporalHostPort Temporal Host:Port
 func (c *Config) TemporalHostPort() string {
 	return fmt.Sprintf("%s:%d", c.GetTemporalHost(), c.GetTemporalPort())
 
 }
 
-//GetTemporalTasklistName The Temporal task list name
+// GetTemporalTasklistName The Temporal task list name
 func (c *Config) GetTemporalTasklistName() string {
 	return c.GetString("TEMPORAL_TASKLISTNAME", "ptfdtasklist")
 }
@@ -138,4 +142,56 @@ func (c *Config) DFEnv() string {
 func (c *Config) VaultHostPort() string {
 	return c.v.GetString("VAULT_HOST_PORT")
 
+}
+
+func (c *Config) GetGrpcServerHostPort() string {
+	return c.GetString("GRPC_SERVER_HOST_PORT", ":50001")
+}
+
+func (c *Config) GetGrpcClientServerHostPort() string {
+	return c.GetString("GRPC_CLIENT_HOST_PORT", "localhost:50001")
+}
+
+func (c *Config) GetHealthServerHostPort() string {
+	return c.GetString("HEALTH_SERVER_HOST_PORT", ":8082")
+}
+
+func (c *Config) GetServerCertFile() string {
+	return c.GetString("SERVER_CERT_FILE", "cert/server-cert.pem")
+}
+
+func (c *Config) GetServerKeyFile() string {
+	return c.GetString("SERVER_KEY_FILE", "cert/server-key.pem")
+}
+
+func (c *Config) GetCACertFile() string {
+	return c.GetString("CA_CERT_FILE", "cert/ca-cert.pem")
+}
+
+func (c *Config) GetClientCertFile() string {
+	return c.GetString("CLIENT_CERT_FILE", "cert/client-cert.pem")
+}
+
+func (c *Config) GetClientKeyFile() string {
+	return c.GetString("CLIENT_KEY_FILE", "cert/client-key.pem")
+}
+
+func (c *Config) GetTlsEnabled() bool {
+	return c.GetBool("TLS_ENABLED")
+}
+
+func (c *Config) GetAdminPassword() string {
+	return c.GetString("ADMIN_PASSWORD", "admin")
+}
+
+func (c *Config) GetTokenSecretKey() string {
+	return c.GetString("TOKEN_SECRET_KEY", "secret")
+}
+
+func (c *Config) GetTokenDuration() int {
+	return c.GetInt("TOKEN_DURATION", 15)
+}
+
+func (c *Config) GetRootPath() string {
+	return c.GetString("ROOT_PATH", "./img")
 }
