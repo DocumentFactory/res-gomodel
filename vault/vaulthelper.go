@@ -36,6 +36,27 @@ func NewVaultHelper(conf *config.Config) *VaultHelper {
 	return &c
 }
 
+func (vh *VaultHelper) GenerateBytes(api string) (map[string]interface{}, error) {
+
+	parms := map[string]interface{}{
+		"format": "base64",
+	}
+	resp, err := vh.client.Logical().Write("/sys/tools/random/32", parms)
+	if err != nil {
+		vh.logh.Error("Error generating bytes ", zap.String("api", api), zap.String("error", err.Error()))
+		return nil, err
+	}
+
+	if resp != nil && len(resp.Warnings) > 0 {
+		for _, sec := range resp.Warnings {
+			vh.logh.Warn("Warning generating bytes ", zap.String("message", sec))
+		}
+	}
+
+	return resp.Data, vh.Setv1(api, resp.Data)
+
+}
+
 func (vh *VaultHelper) Getv1(api string) (map[string]interface{}, error) {
 
 	secret, err := vh.client.Logical().Read(api)
