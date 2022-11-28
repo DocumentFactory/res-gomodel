@@ -3,13 +3,11 @@ package natsutils
 import (
 	"context"
 	"encoding/json"
-	"io"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/minio/sio"
 	"github.com/nats-io/nats.go"
 	"github.com/pnocera/res-gomodel/config"
 )
@@ -19,7 +17,7 @@ type NatsHelper struct {
 	nc   *nats.Conn
 	js   nats.JetStreamContext
 	// subs  []*nats.Subscription
-	store nats.ObjectStore
+	// store nats.ObjectStore
 }
 
 type SubscribeInvocationHandler func(ctx context.Context, msg *nats.Msg) error
@@ -54,18 +52,18 @@ func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
 	c.addStream("tasks", 32*time.Minute)
 	c.addStream("cancel", 30*time.Second)
 
-	c.store, err = js.ObjectStore("tempfiles")
-	if err != nil {
+	// c.store, err = js.ObjectStore("tempfiles")
+	// if err != nil {
 
-		c.store, err = c.js.CreateObjectStore(&nats.ObjectStoreConfig{
-			Bucket:      "tempfiles",
-			Description: "Temporary files",
-			TTL:         30 * time.Second,
-			MaxBytes:    1024 * 1024 * 1024 * 1024,
-			Storage:     nats.FileStorage,
-			Replicas:    1,
-		})
-	}
+	// 	c.store, err = c.js.CreateObjectStore(&nats.ObjectStoreConfig{
+	// 		Bucket:      "tempfiles",
+	// 		Description: "Temporary files",
+	// 		TTL:         30 * time.Second,
+	// 		MaxBytes:    1024 * 1024 * 1024 * 1024,
+	// 		Storage:     nats.FileStorage,
+	// 		Replicas:    1,
+	// 	})
+	// }
 
 	if err != nil {
 		return nil, err
@@ -74,71 +72,71 @@ func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
 	return &c, nil
 }
 
-func (nh *NatsHelper) PutBytes(key string, data []byte) (*nats.ObjectInfo, error) {
+// func (nh *NatsHelper) PutBytes(key string, data []byte) (*nats.ObjectInfo, error) {
 
-	return nh.store.PutBytes(key, data)
+// 	return nh.store.PutBytes(key, data)
 
-}
+// }
 
-func (nh *NatsHelper) Put(name string, masterkey string, reader io.Reader) ([32]byte, error) {
-	nonce, err := GetNonce()
-	if err != nil {
-		return [32]byte{}, err
-	}
+// func (nh *NatsHelper) Put(name string, masterkey string, reader io.Reader) ([32]byte, error) {
+// 	nonce, err := GetNonce()
+// 	if err != nil {
+// 		return [32]byte{}, err
+// 	}
 
-	key, err := GetKey(masterkey, nonce)
-	if err != nil {
-		return [32]byte{}, err
-	}
+// 	key, err := GetKey(masterkey, nonce)
+// 	if err != nil {
+// 		return [32]byte{}, err
+// 	}
 
-	encrypted, err := sio.EncryptReader(reader, sio.Config{Key: key[:]})
-	if err != nil {
-		return [32]byte{}, err
-	}
+// 	encrypted, err := sio.EncryptReader(reader, sio.Config{Key: key[:]})
+// 	if err != nil {
+// 		return [32]byte{}, err
+// 	}
 
-	_, err = nh.store.Put(&nats.ObjectMeta{
-		Name: name,
-	}, encrypted)
+// 	_, err = nh.store.Put(&nats.ObjectMeta{
+// 		Name: name,
+// 	}, encrypted)
 
-	if err != nil {
-		return [32]byte{}, err
-	}
+// 	if err != nil {
+// 		return [32]byte{}, err
+// 	}
 
-	return nonce, nil
+// 	return nonce, nil
 
-}
+// }
 
-func (nh *NatsHelper) GetBytes(key string) ([]byte, error) {
+// func (nh *NatsHelper) GetBytes(key string) ([]byte, error) {
 
-	return nh.store.GetBytes(key)
+// 	return nh.store.GetBytes(key)
 
-}
+// }
 
-func (nh *NatsHelper) Get(masterkey string, nonce [32]byte, name string) (io.Reader, error) {
+// func (nh *NatsHelper) Get(masterkey string, nonce [32]byte, name string) (io.Reader, error) {
 
-	key, err := GetKey(masterkey, nonce)
-	if err != nil {
-		return nil, err
-	}
+// 	key, err := GetKey(masterkey, nonce)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	obj, err := nh.store.Get(name)
-	if err != nil {
-		return nil, err
-	}
+// 	obj, err := nh.store.Get(name)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	decrypted, err := sio.DecryptReader(obj, sio.Config{Key: key[:]})
-	if err != nil {
-		return nil, err
-	}
+// 	decrypted, err := sio.DecryptReader(obj, sio.Config{Key: key[:]})
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	return decrypted, nil
-}
+// 	return decrypted, nil
+// }
 
-func (nh *NatsHelper) Delete(key string) error {
+// func (nh *NatsHelper) Delete(key string) error {
 
-	return nh.store.Delete(key)
+// 	return nh.store.Delete(key)
 
-}
+// }
 
 func (nh *NatsHelper) addStream(name string, maxage time.Duration) error {
 	conf := &nats.StreamConfig{
