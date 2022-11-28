@@ -1,8 +1,11 @@
 package vault
 
 import (
+	"encoding/hex"
 	"fmt"
+	"strconv"
 
+	"github.com/hashicorp/go-uuid"
 	vault "github.com/hashicorp/vault/api"
 	"github.com/pnocera/res-gomodel/config"
 	"github.com/pnocera/res-gomodel/logs"
@@ -38,22 +41,26 @@ func NewVaultHelper(conf *config.Config) *VaultHelper {
 
 func (vh *VaultHelper) GenerateBytes(api string) (map[string]interface{}, error) {
 
-	parms := map[string]interface{}{
-		"format": "base64",
-	}
-	resp, err := vh.client.Logical().Write("/sys/tools/random/32", parms)
+	bytes, err := strconv.Atoi(api)
+
 	if err != nil {
 		vh.logh.Error("Error generating bytes ", zap.String("api", api), zap.String("error", err.Error()))
 		return nil, err
 	}
 
-	if resp != nil && len(resp.Warnings) > 0 {
-		for _, sec := range resp.Warnings {
-			vh.logh.Warn("Warning generating bytes ", zap.String("message", sec))
-		}
+	randBytes, err := uuid.GenerateRandomBytes(bytes)
+	if err != nil {
+		vh.logh.Error("Error generating bytes ", zap.String("api", api), zap.String("error", err.Error()))
+		return nil, err
 	}
 
-	return resp.Data, vh.Setv1(api, resp.Data)
+	retStr := hex.EncodeToString(randBytes)
+
+	//create a map[string]interface from retStr
+	retMap := make(map[string]interface{})
+	retMap["random"] = retStr
+
+	return retMap, vh.Setv1(api, retMap)
 
 }
 
