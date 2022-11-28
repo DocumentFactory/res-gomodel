@@ -3,7 +3,6 @@ package vault
 import (
 	"encoding/hex"
 	"fmt"
-	"strconv"
 
 	"github.com/hashicorp/go-uuid"
 	vault "github.com/hashicorp/vault/api"
@@ -41,12 +40,7 @@ func NewVaultHelper(conf *config.Config) *VaultHelper {
 
 func (vh *VaultHelper) GenerateBytes(api string) (map[string]interface{}, error) {
 
-	bytes, err := strconv.Atoi(api)
-
-	if err != nil {
-		vh.logh.Error("Error generating bytes ", zap.String("api", api), zap.String("error", err.Error()))
-		return nil, err
-	}
+	bytes := 32
 
 	randBytes, err := uuid.GenerateRandomBytes(bytes)
 	if err != nil {
