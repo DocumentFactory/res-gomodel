@@ -6,8 +6,10 @@ import (
 
 	"github.com/hashicorp/go-uuid"
 	vault "github.com/hashicorp/vault/api"
+	"github.com/mitchellh/mapstructure"
 	"github.com/pnocera/res-gomodel/config"
 	"github.com/pnocera/res-gomodel/logs"
+	"github.com/pnocera/res-gomodel/types"
 	"go.uber.org/zap"
 )
 
@@ -38,7 +40,7 @@ func NewVaultHelper(conf *config.Config) *VaultHelper {
 	return &c
 }
 
-func (vh *VaultHelper) GenerateBytes(api string) (map[string]interface{}, error) {
+func (vh *VaultHelper) GenerateBytes(api string) (*types.MasterKey, error) {
 
 	bytes := 32
 
@@ -48,13 +50,19 @@ func (vh *VaultHelper) GenerateBytes(api string) (map[string]interface{}, error)
 		return nil, err
 	}
 
-	retStr := hex.EncodeToString(randBytes)
+	retVal := map[string]interface{}{
+		"random": hex.EncodeToString(randBytes),
+	}
 
 	//create a map[string]interface from retStr
-	retMap := make(map[string]interface{})
-	retMap["random"] = retStr
+	var result types.MasterKey
+	err = mapstructure.Decode(retVal, &result)
+	if err != nil {
+		vh.logh.Error("Error decoding bytes ", zap.String("api", api), zap.String("error", err.Error()))
+		return nil, err
+	}
 
-	return retMap, vh.Setv1(api, retMap)
+	return &result, vh.Setv1(api, retVal)
 
 }
 

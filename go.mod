@@ -7,6 +7,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/vault/api v1.8.2
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/nats-io/nats.go v1.20.0
 	go.uber.org/zap v1.23.0
 	google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6
@@ -43,7 +44,6 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/nats-io/nats-server/v2 v2.9.8 // indirect
 	github.com/oklog/run v1.1.0 // indirect
