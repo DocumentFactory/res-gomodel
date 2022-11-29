@@ -67,6 +67,79 @@ func (ul *DaprHelper) GetExtension(ctx context.Context, Mimetype string) (string
 
 }
 
+func (ul *DaprHelper) SetMasterKey(ctx context.Context, runid string) (string, error) {
+	secretbytes, err := ul.Post(ctx, enums.SecretSvc, "secretv1", types.SecretData{
+		Action:     "generate",
+		SecretPath: fmt.Sprintf("%s/%s", ul.conf.DFEnv(), "masterkey"),
+		SecretID:   runid,
+	})
+
+	if err != nil {
+		ul.logh.Error("Dapr Error setting masterkey ",
+			zap.String("runid", runid),
+			zap.String("error", err.Error()))
+		return "", err
+	}
+
+	var secretresp types.MasterKey
+
+	err = json.Unmarshal(secretbytes, &secretresp)
+
+	if err != nil {
+		ul.logh.Error("Dapr Error unmarshalling masterkey ",
+			zap.String("runid", runid),
+			zap.String("bytes", string(secretbytes)),
+			zap.String("error", err.Error()))
+		return "", err
+	}
+
+	return secretresp.Random, nil
+}
+
+func (ul *DaprHelper) GetMasterKey(ctx context.Context, runid string) (string, error) {
+	secretbytes, err := ul.Post(ctx, enums.SecretSvc, "secretv1", types.SecretData{
+		Action:     "read",
+		SecretPath: fmt.Sprintf("%s/%s", ul.conf.DFEnv(), "masterkey"),
+		SecretID:   runid,
+	})
+
+	if err != nil {
+		ul.logh.Error("Dapr Error getting masterkey ",
+			zap.String("runid", runid),
+			zap.String("error", err.Error()))
+		return "", err
+	}
+
+	var secretresp types.SecretData
+
+	err = json.Unmarshal(secretbytes, &secretresp)
+
+	if err != nil {
+		ul.logh.Error("Dapr Error unmarshalling masterkey ",
+			zap.String("runid", runid),
+			zap.String("bytes", string(secretbytes)),
+			zap.String("error", err.Error()))
+		return "", err
+	}
+
+	if !secretresp.Ok {
+		err = errors.New(secretresp.ErrMsg)
+		ul.logh.Error("Dapr Error getting masterkey ",
+			zap.String("runid", runid),
+			zap.String("error", err.Error()))
+
+		return "", err
+	}
+
+	// return secretvalue random of the map
+	for _, v := range secretresp.SecretValue {
+		return v.(string), nil
+	}
+
+	return "", nil
+
+}
+
 func (ul *DaprHelper) GetNodeSecret(ctx context.Context, node types.Nodes) (map[string]interface{}, error) {
 	return ul.GetSecret(ctx, node.Nodetype, node.ID)
 }
