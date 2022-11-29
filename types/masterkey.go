@@ -1,5 +1,5 @@
 package types
 
 type MasterKey struct {
-	Random string `json:"random"`
+	Random string `json:"random" mapstructure:"random"`
 }
