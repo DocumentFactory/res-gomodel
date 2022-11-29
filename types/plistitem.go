@@ -16,14 +16,15 @@ type PListItem struct {
 	TmpFolderID      string       `json:"tmpFolderID"`
 	WFID             string       `json:"wfid"`
 	UploadUrl        string       `json:"uploadurl"`
+	Nonce            string       `json:"nonce"`
 }
 
-//HasChildrenType HasChildrenType
+// HasChildrenType HasChildrenType
 func (n *PListItem) HasChildrenType(typeName string) bool {
 	return len(FindAllByItemtype(n, typeName)) > 0
 }
 
-//FindAllByItemtype FindAllByItemtype
+// FindAllByItemtype FindAllByItemtype
 func FindAllByItemtype(root *PListItem, objtype string) []*PListItem {
 	result := make([]*PListItem, 0)
 	queue := make([]*PListItem, 0)
