@@ -15,8 +15,7 @@ message UploadFileRequest {
  
 message UploadFileInfo {
   string file_id = 1; 
-  bytes master_key = 2;
-  string run_id = 3;
+  string run_id = 2;
 } 
  
 message UploadFileResponse {
@@ -28,8 +27,7 @@ message UploadFileResponse {
 message DownloadFileRequest {
   string id = 1;
   bytes nonce = 2;
-  bytes master_key = 3;
-  string run_id = 4;
+  string run_id = 3;
 }
 
 message DownloadFileResponse {
