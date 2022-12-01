@@ -21,12 +21,12 @@ message UploadFileInfo {
 message UploadFileResponse {
   string id = 1;
   uint32 size = 2;
-  bytes nonce = 3;
+  string nonce = 3;
 } 
 
 message DownloadFileRequest {
   string id = 1;
-  bytes nonce = 2;
+  string nonce = 2;
   string run_id = 3;
 }
 
