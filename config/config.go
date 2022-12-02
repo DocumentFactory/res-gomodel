@@ -180,6 +180,10 @@ func (c *Config) GetTlsEnabled() bool {
 	return c.GetBool("TLS_ENABLED")
 }
 
+func (c *Config) GetFIPSEnabled() bool {
+	return c.GetBool("FIPS_ENABLED")
+}
+
 func (c *Config) GetAdminPassword() string {
 	return c.GetString("ADMIN_PASSWORD", "admin")
 }
