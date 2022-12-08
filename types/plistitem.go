@@ -15,6 +15,7 @@ type PListItem struct {
 	FileName         string       `json:"FileName"`
 	TmpFolderID      string       `json:"tmpFolderID"`
 	WFID             string       `json:"wfid"`
+	RunID            string       `json:"runid"`
 	UploadUrl        string       `json:"uploadurl"`
 	Nonce            string       `json:"nonce"`
 }
