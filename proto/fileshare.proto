@@ -28,6 +28,7 @@ message DownloadFileRequest {
   string id = 1;
   string nonce = 2;
   string run_id = 3;
+  uint32 size = 4;
 }
 
 message DownloadFileResponse {
