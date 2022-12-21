@@ -8,9 +8,9 @@ require (
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/vault/api v1.8.2
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/nats-io/nats.go v1.20.0
-	go.uber.org/zap v1.23.0
-	google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6
+	github.com/nats-io/nats.go v1.22.0
+	go.uber.org/zap v1.24.0
+	google.golang.org/genproto v0.0.0-20221207170731-23e4bf6bdc37
 	google.golang.org/grpc v1.51.0
 )
 
