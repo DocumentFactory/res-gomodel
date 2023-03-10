@@ -1,8 +1,9 @@
 gen:
-	protoc --proto_path=proto proto/*.proto --go_out=plugins=grpc:pb
+	cd proto && \
+	buf generate
 
 build: 
-	export VERSION=v0.1.69
+	export VERSION=v0.1.70
 	go mod tidy
 	echo $(VERSION) > VERSION
 	git add .

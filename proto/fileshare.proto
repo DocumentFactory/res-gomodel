@@ -1,4 +1,4 @@
-syntax="proto3";
+syntax = "proto3";
 
 package pnocera.fileshare;
 
@@ -12,17 +12,17 @@ message UploadFileRequest {
     bytes chunk_data = 2;
   };
 }
- 
+
 message UploadFileInfo {
-  string file_id = 1; 
+  string file_id = 1;
   string run_id = 2;
-} 
- 
+}
+
 message UploadFileResponse {
   string id = 1;
   uint32 size = 2;
   string nonce = 3;
-} 
+}
 
 message DownloadFileRequest {
   string id = 1;
@@ -31,20 +31,14 @@ message DownloadFileRequest {
   uint32 size = 4;
 }
 
-message DownloadFileResponse {
-  bytes chunk_data = 1;
-}
+message DownloadFileResponse { bytes chunk_data = 1; }
 
-message DeleteFolderRequest{
-  string run_id = 1;
-}
+message DeleteFolderRequest { string run_id = 1; }
 
-message DeleteFolderResponse{
-  string message = 1;
-}
+message DeleteFolderResponse { string message = 1; }
 
 service FileshareService {
- 
+
   rpc UploadFile(stream UploadFileRequest) returns (UploadFileResponse) {
     option (google.api.http) = {
       post : "/v1/fileshare/upload_file"
@@ -63,6 +57,11 @@ service FileshareService {
       delete : "/v1/fileshare/delete_folder/{run_id}"
     };
   };
- 
-}
 
+  rpc DuplicateFile(UploadFileInfo) returns (UploadFileResponse) {
+    option (google.api.http) = {
+      post : "/v1/fileshare/duplicate_file"
+      body : "*"
+    };
+  };
+}
