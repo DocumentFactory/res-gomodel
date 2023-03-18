@@ -21,7 +21,7 @@ type FileshareServiceClient interface {
 	UploadFile(ctx context.Context, opts ...grpc.CallOption) (FileshareService_UploadFileClient, error)
 	DownloadFile(ctx context.Context, in *DownloadFileRequest, opts ...grpc.CallOption) (FileshareService_DownloadFileClient, error)
 	DeleteFolder(ctx context.Context, in *DeleteFolderRequest, opts ...grpc.CallOption) (*DeleteFolderResponse, error)
-	DuplicateFile(ctx context.Context, in *UploadFileInfo, opts ...grpc.CallOption) (*UploadFileResponse, error)
+	DuplicateFile(ctx context.Context, in *DuplicateFileRequest, opts ...grpc.CallOption) (*DuplicateFileResponse, error)
 }
 
 type fileshareServiceClient struct {
@@ -107,8 +107,8 @@ func (c *fileshareServiceClient) DeleteFolder(ctx context.Context, in *DeleteFol
 	return out, nil
 }
 
-func (c *fileshareServiceClient) DuplicateFile(ctx context.Context, in *UploadFileInfo, opts ...grpc.CallOption) (*UploadFileResponse, error) {
-	out := new(UploadFileResponse)
+func (c *fileshareServiceClient) DuplicateFile(ctx context.Context, in *DuplicateFileRequest, opts ...grpc.CallOption) (*DuplicateFileResponse, error) {
+	out := new(DuplicateFileResponse)
 	err := c.cc.Invoke(ctx, "/pnocera.fileshare.FileshareService/DuplicateFile", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -123,7 +123,7 @@ type FileshareServiceServer interface {
 	UploadFile(FileshareService_UploadFileServer) error
 	DownloadFile(*DownloadFileRequest, FileshareService_DownloadFileServer) error
 	DeleteFolder(context.Context, *DeleteFolderRequest) (*DeleteFolderResponse, error)
-	DuplicateFile(context.Context, *UploadFileInfo) (*UploadFileResponse, error)
+	DuplicateFile(context.Context, *DuplicateFileRequest) (*DuplicateFileResponse, error)
 }
 
 // UnimplementedFileshareServiceServer should be embedded to have forward compatible implementations.
@@ -139,7 +139,7 @@ func (UnimplementedFileshareServiceServer) DownloadFile(*DownloadFileRequest, Fi
 func (UnimplementedFileshareServiceServer) DeleteFolder(context.Context, *DeleteFolderRequest) (*DeleteFolderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFolder not implemented")
 }
-func (UnimplementedFileshareServiceServer) DuplicateFile(context.Context, *UploadFileInfo) (*UploadFileResponse, error) {
+func (UnimplementedFileshareServiceServer) DuplicateFile(context.Context, *DuplicateFileRequest) (*DuplicateFileResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DuplicateFile not implemented")
 }
 
@@ -220,7 +220,7 @@ func _FileshareService_DeleteFolder_Handler(srv interface{}, ctx context.Context
 }
 
 func _FileshareService_DuplicateFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UploadFileInfo)
+	in := new(DuplicateFileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func _FileshareService_DuplicateFile_Handler(srv interface{}, ctx context.Contex
 		FullMethod: "/pnocera.fileshare.FileshareService/DuplicateFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FileshareServiceServer).DuplicateFile(ctx, req.(*UploadFileInfo))
+		return srv.(FileshareServiceServer).DuplicateFile(ctx, req.(*DuplicateFileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

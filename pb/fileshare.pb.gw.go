@@ -173,7 +173,7 @@ func local_request_FileshareService_DeleteFolder_0(ctx context.Context, marshale
 }
 
 func request_FileshareService_DuplicateFile_0(ctx context.Context, marshaler runtime.Marshaler, client FileshareServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq UploadFileInfo
+	var protoReq DuplicateFileRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -190,7 +190,7 @@ func request_FileshareService_DuplicateFile_0(ctx context.Context, marshaler run
 }
 
 func local_request_FileshareService_DuplicateFile_0(ctx context.Context, marshaler runtime.Marshaler, server FileshareServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq UploadFileInfo
+	var protoReq DuplicateFileRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)

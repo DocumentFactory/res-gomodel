@@ -13,9 +13,18 @@ message UploadFileRequest {
   };
 }
 
-message UploadFileInfo {
-  string file_id = 1;
+message UploadFileInfo { string run_id = 2; }
+
+message DuplicateFileRequest {
+  string id = 1;
   string run_id = 2;
+  string nonce = 3;
+}
+
+message DuplicateFileResponse {
+  string id = 1;
+  uint32 size = 2;
+  string nonce = 3;
 }
 
 message UploadFileResponse {
@@ -58,7 +67,7 @@ service FileshareService {
     };
   };
 
-  rpc DuplicateFile(UploadFileInfo) returns (UploadFileResponse) {
+  rpc DuplicateFile(DuplicateFileRequest) returns (DuplicateFileResponse) {
     option (google.api.http) = {
       post : "/v1/fileshare/duplicate_file"
       body : "*"
