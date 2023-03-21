@@ -1,11 +1,12 @@
 package enums
 
-//ConnectorSubtype ConnectorSubtype
+// ConnectorSubtype ConnectorSubtype
 type ConnectorSubtype string
 
 const (
 	SharepointConnector     string = "or.co.ob.sh"
 	LocalConnector          string = "or.co.ob.lo"
+	SftpConnector           string = "or.co.ob.sf"
 	BuilderActionMergeType  string = "ou.ba.mr"
 	DropboxConnector        string = "or.co.ob.db"
 	BuilderActionOutputType string = "ou.ba.op"
@@ -34,21 +35,26 @@ const (
 
 type DaprService string
 
-//services names
+// services names
 const (
-	DataSvc    = "datalayer"
-	NodeapiSvc = "apisvc"
-	Rbacsvc    = "rbacsvc"
-	Compapi    = "compapisvc"
-	Qsvc       = "qsvc"
-	SecretSvc  = "gosecret"
+	DataSvc       = "datalayer"
+	NodeapiSvc    = "apisvc"
+	Rbacsvc       = "rbacsvc"
+	Compapi       = "compapisvc"
+	Qsvc          = "qsvc"
+	SecretSvc     = "gosecret"
+	SharepointSvc = "spgwsvc"
+	SftpSvc       = "sftpgwsvc"
 )
 
-//actions names
+// actions names
 const (
 	ActionPreprocess  = "preprocess"
 	ActionProcess     = "process"
 	ActionMerge       = "merge"
 	ActionBook        = "book"
 	ActionPostProcess = "postprocess"
+	ActionFinalize    = "finalize"
+	ActionDownload    = "download"
+	ActionUpload      = "upload"
 )

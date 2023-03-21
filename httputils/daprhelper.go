@@ -54,6 +54,19 @@ func (ul *DaprHelper) Post(ctx context.Context, servicename string, api string, 
 	return response, err
 }
 
+func (ul *DaprHelper) GetMime(ctx context.Context, extension string) (string, error) {
+
+	response, err := ul.client.InvokeMethod(ctx, enums.DataSvc, "mimes/mime/"+strings.ReplaceAll(extension, "/", "|"), "get")
+
+	if err != nil {
+		ul.logh.Error("Dapr Error getting mime ", zap.String("extension", extension), zap.String("error", err.Error()))
+		return "", err
+	}
+
+	return string(response), nil
+
+}
+
 func (ul *DaprHelper) GetExtension(ctx context.Context, Mimetype string) (string, error) {
 
 	response, err := ul.client.InvokeMethod(ctx, enums.DataSvc, "mimes/extension/"+strings.ReplaceAll(Mimetype, "/", "|"), "get")
