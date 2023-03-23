@@ -199,3 +199,7 @@ func (c *Config) GetTokenDuration() int {
 func (c *Config) GetRootPath() string {
 	return c.GetString("ROOT_PATH", "./img")
 }
+
+func (c *Config) GetEtcdUrl() string {
+	return c.GetString("ETCD_URL", "etcd.default.svc.cluster.local:2379")
+}

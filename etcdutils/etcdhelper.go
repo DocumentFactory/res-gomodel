@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"strconv"
 )
 
 var keyprefix string = "/store/"
@@ -45,7 +46,7 @@ func (eh *EtcdHelper) Get(key string) ([]byte, error) {
 		return nil, err
 	}
 	if !found {
-		return nil, errors.New("Key not found")
+		return nil, errors.New("key not found")
 	}
 	return bytes, nil
 }
@@ -59,10 +60,57 @@ func (eh *EtcdHelper) Put(key string, value []byte) error {
 	return tx.Commit()
 }
 
-func (eh *EtcdHelper) Watch(key string, fn func(old, new interface{})) (error, context.CancelFunc) {
+func (eh *EtcdHelper) Increment(key string) error {
+	bytes, err := eh.Get(key)
+	if err != nil {
+		bytes = []byte("0")
+		err = eh.Put(key, bytes)
+	}
+	if err != nil {
+		return err
+	}
+
+	i, err := strconv.Atoi(string(bytes))
+	if err != nil {
+		return err
+	}
+
+	bytes = []byte(strconv.Itoa(i + 1))
+	err = eh.Put(key, bytes)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (eh *EtcdHelper) Decrement(key string) error {
+	bytes, err := eh.Get(key)
+	if err != nil {
+		bytes = []byte("0")
+		err = eh.Put(key, bytes)
+	}
+	if err != nil {
+		return err
+	}
+
+	i, err := strconv.Atoi(string(bytes))
+	if err != nil {
+		return err
+	}
+	if i == 0 {
+		return nil
+	}
+	bytes = []byte(strconv.Itoa(i - 1))
+	err = eh.Put(key, bytes)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (eh *EtcdHelper) Watch(key string, fn func(old, new interface{})) (context.CancelFunc, error) {
 	watchCtx, watchCancel := context.WithCancel(context.Background())
 
-	return eh.db.WatchKey(watchCtx, key, fn), watchCancel
+	return watchCancel, eh.db.WatchKey(watchCtx, key, fn)
 
 }
 
