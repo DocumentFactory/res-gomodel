@@ -12,4 +12,5 @@ type WorkflowData struct {
 	WFID            string     `json:"wfid"`
 	RUNID           string     `json:"runid"`
 	WorkflowType    int        `json:"workflowtype"`
+	TotalSize       uint64     `json:"totalsize"`
 }
