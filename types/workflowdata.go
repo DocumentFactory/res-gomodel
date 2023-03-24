@@ -11,4 +11,5 @@ type WorkflowData struct {
 	BaseUrl         string     `json:"baseurl"`
 	WFID            string     `json:"wfid"`
 	RUNID           string     `json:"runid"`
+	WorkflowType    int        `json:"workflowtype"`
 }
