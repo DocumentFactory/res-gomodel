@@ -10,6 +10,7 @@ type PListItem struct {
 	Mimetype         string       `json:"Mimetype"`
 	Metadata         string       `json:"Metadata"`
 	ParentID         string       `json:"ParentID"`
+	Size             int          `json:"Size"`
 	Children         []*PListItem `json:"Children"`
 	PostMerge        bool         `json:"PostMerge"`
 	FileName         string       `json:"FileName"`
