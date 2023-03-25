@@ -203,3 +203,13 @@ func (c *Config) GetRootPath() string {
 func (c *Config) GetEtcdUrl() string {
 	return c.GetString("ETCD_URL", "etcd.default.svc.cluster.local:2379")
 }
+
+func (c *Config) GetBigSize() int {
+	var size = c.v.GetInt("BIG_SIZE")
+	if size <= 0 {
+		size = 1024 * 1024 * 200
+	} else {
+		size = size * 1024 * 1024
+	}
+	return size
+}
