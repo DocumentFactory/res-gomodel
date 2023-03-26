@@ -7,16 +7,14 @@ import (
 	"strconv"
 )
 
-var keyprefix string = "/store/"
-
 type EtcdHelper struct {
 	ctx context.Context
 	db  *DB
 }
 
-func NewEtcdHelper(ctx context.Context, url string) (*EtcdHelper, error) {
+func NewEtcdHelper(ctx context.Context, url string, keyprefix string) (*EtcdHelper, error) {
 	c := EtcdHelper{}
-	db, err := GetDB(ctx, url)
+	db, err := GetDB(ctx, url, keyprefix)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +23,7 @@ func NewEtcdHelper(ctx context.Context, url string) (*EtcdHelper, error) {
 	return &c, nil
 }
 
-func GetDB(ctx context.Context, url string) (*DB, error) {
+func GetDB(ctx context.Context, url string, keyprefix string) (*DB, error) {
 
 	return New(ctx, url, Options{
 		Logf: func(format string, args ...interface{}) {
