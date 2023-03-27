@@ -30,9 +30,9 @@ func GetDB(ctx context.Context, url string, keyprefix string) (*DB, error) {
 			log.Printf(format, args...)
 		},
 		DeleteAllOnStart: false,
-		WatchFunc: func(k []KV) {
-			log.Printf("watch: %v", k)
-		},
+		// WatchFunc: func(k []KV) {
+		// 	log.Printf("watch: %v", k)
+		// },
 		KeyPrefix: keyprefix})
 }
 
