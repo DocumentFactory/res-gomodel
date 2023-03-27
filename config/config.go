@@ -23,6 +23,13 @@ func New() *Config {
 
 	return &c
 }
+func (c *Config) GetStrings(name string, defaultvalue []string) []string {
+	val := c.v.GetStringSlice(name)
+	if len(val) == 0 {
+		val = defaultvalue
+	}
+	return val
+}
 
 func (c *Config) GetString(name string, defaultvalue string) string {
 	val := c.v.GetString(name)
