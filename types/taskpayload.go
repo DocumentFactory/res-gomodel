@@ -1,7 +1,7 @@
 package types
 
 type TaskPayload struct {
-	Data   WorkflowData `json:"data"`
+	Data   WorkflowInfo `json:"data"`
 	Docs   PListItem    `json:"docs"` // The item to upload / download
 	Params interface{}  `json:"params"`
 }
