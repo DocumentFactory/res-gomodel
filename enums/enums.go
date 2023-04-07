@@ -7,6 +7,7 @@ const (
 	SharepointConnector     string = "or.co.ob.sh"
 	LocalConnector          string = "or.co.ob.lo"
 	SftpConnector           string = "or.co.ob.sf"
+	S3Connector             string = "or.co.ob.s3"
 	BuilderActionMergeType  string = "ou.ba.mr"
 	DropboxConnector        string = "or.co.ob.db"
 	BuilderActionOutputType string = "ou.ba.op"
@@ -45,6 +46,7 @@ const (
 	SecretSvc     = "gosecret"
 	SharepointSvc = "spgwsvc"
 	SftpSvc       = "sftpgwsvc"
+	S3Svc         = "s3svc"
 )
 
 // actions names
