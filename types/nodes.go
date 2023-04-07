@@ -1,6 +1,6 @@
 package types
 
-//Nodes Nodes
+// Nodes Nodes
 type Nodes struct {
 	ID          string      `json:"id"`
 	Name        string      `json:"name"`
@@ -17,20 +17,28 @@ type Nodes struct {
 	Children    []*Nodes    `json:"children"`
 }
 
-//TypeExtData Extdata structure
+// TypeExtData Extdata structure
 type TypeExtData struct {
 	Sub  map[string]interface{} `json:"sub"`
 	Meta map[string]interface{} `json:"meta"`
 	Tags []string               `json:"tags"`
 }
 
-//SPConnectorMeta Sharepoint Connector Metadata
+// SPConnectorMeta Sharepoint Connector Metadata
 type SPConnectorMeta struct {
 	Clientid     string `json:"client_id"`
 	Clientsecret string `json:"client_secret"`
 }
 
-//DbConnectorMeta Dropbox Connector Metadata
+// SPConnectorMeta Sharepoint Connector Metadata
+type S3ConnectorMeta struct {
+	EndPoint     string `json:"endpoint"`
+	Region       string `json:"region"`
+	Clientid     string `json:"client_id"`
+	Clientsecret string `json:"client_secret"`
+}
+
+// DbConnectorMeta Dropbox Connector Metadata
 type DbConnectorMeta struct {
 	Token string `json:"token"`
 }
@@ -101,7 +109,7 @@ func FindAllByNodetype(root *Nodes, objtype string) []*Nodes {
 	return result
 }
 
-//HasChildrenType HasChildrenType
+// HasChildrenType HasChildrenType
 func (n *Nodes) HasChildrenType(typeName string) bool {
 	return len(FindAllByNodetype(n, typeName)) > 0
 }
