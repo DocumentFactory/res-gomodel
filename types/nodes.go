@@ -77,6 +77,7 @@ type HasFilename struct {
 
 type BactOutputMeta struct {
 	OutputConnector string `json:"outputconnector"`
+	BucketID        string `json:"bucketid"`
 	OutputID        string `json:"outputid"`
 	DocumentName    string `json:"documentname"`
 	SameFolder      bool   `json:"samefolder"`
