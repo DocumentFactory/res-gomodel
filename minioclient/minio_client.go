@@ -227,7 +227,7 @@ func (c *MinioClient) DeleteBucket(ctx context.Context, runid string) error {
 	return nil
 }
 
-func (c *MinioClient) CopyTo(ctx context.Context, runid string, id string, accesskeyid string, accesskey string, region string, destbucket string, dest string) (int64, error) {
+func (c *MinioClient) CopyTo(ctx context.Context, runid string, id string, accesskeyid string, accesskey string, region string, destbucket string, dest string, endpoint string) (int64, error) {
 
 	reader, err := c.Download(ctx, runid, id)
 
@@ -246,7 +246,7 @@ func (c *MinioClient) CopyTo(ctx context.Context, runid string, id string, acces
 		BucketLookup: minio.BucketLookupAuto,
 	}
 
-	client, err := minio.New(dest, options)
+	client, err := minio.New(endpoint, options)
 	if LogError(err) != nil {
 		return 0, err
 	}
