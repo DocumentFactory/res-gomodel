@@ -15,8 +15,9 @@ import (
 )
 
 type MinioClient struct {
-	client *minio.Client
-	cfg    *config.Config
+	client         *minio.Client
+	cfg            *config.Config
+	size_treshhold int
 }
 
 func LogError(err error) error {
@@ -55,7 +56,7 @@ func NewMinioClient(cfg *config.Config) (*MinioClient, error) {
 	insecureTLS := cfg.GetBool("MINIO_INSECURE")
 	region := cfg.GetString("MINIO_REGION", "")
 
-	minio.MaxRetry = 10
+	minio.MaxRetry = cfg.GetInt("MINIO_MAXRETRY", 10)
 
 	creds := credentials.NewChainCredentials([]credentials.Provider{
 		&credentials.EnvAWS{},
@@ -106,8 +107,9 @@ func NewMinioClient(cfg *config.Config) (*MinioClient, error) {
 	}
 
 	return &MinioClient{
-		client: client,
-		cfg:    cfg,
+		client:         client,
+		cfg:            cfg,
+		size_treshhold: cfg.GetInt("MINIO_SIZE_TRESHHOLD", 30*1024*1024),
 	}, nil
 }
 
@@ -124,7 +126,7 @@ func (c *MinioClient) BucketExists(ctx context.Context, runid string) (bool, err
 	return found, nil
 }
 
-func (c *MinioClient) Upload(ctx context.Context, runid string, reader io.Reader) (int64, string, error) {
+func (c *MinioClient) Upload(ctx context.Context, runid string, contenttype string, reader io.ReadSeeker) (int64, string, error) {
 
 	newid := gonanoid.Must()
 
@@ -142,18 +144,35 @@ func (c *MinioClient) Upload(ctx context.Context, runid string, reader io.Reader
 		}
 	}
 
+	if contenttype == "" {
+		contenttype = "application/octet-stream"
+	}
+
+	size, err := reader.Seek(0, io.SeekEnd)
+	if LogError(err) != nil {
+		return 0, "", err
+	}
+
 	opts := minio.PutObjectOptions{StorageClass: "STANDARD"}
-	opts.ContentType = "application/octet-stream"
+	opts.ContentType = contenttype
 	// the only option with the high-level api is to let the library handle the checksum computation
 	opts.SendContentMd5 = true
-	// only use multipart uploads for very large files
-	opts.PartSize = 200 * 1024 * 1024
+	// only use multipart uploads for large files
+	opts.PartSize = uint64(c.size_treshhold)
 
-	opts.ConcurrentStreamParts = true
+	if size > int64(c.size_treshhold) {
 
-	opts.NumThreads = 5
+		opts.ConcurrentStreamParts = true
 
-	info, err := c.client.PutObject(ctx, runid, newid, reader, -1, opts)
+		opts.NumThreads = 5
+	}
+
+	_, err = reader.Seek(0, io.SeekStart)
+	if LogError(err) != nil {
+		return 0, "", err
+	}
+
+	info, err := c.client.PutObject(ctx, runid, newid, reader, size, opts)
 
 	if LogError(err) != nil {
 		return 0, "", err
