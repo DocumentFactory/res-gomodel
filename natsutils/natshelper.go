@@ -144,15 +144,15 @@ func (nh *NatsHelper) addStream(name string, maxage time.Duration) error {
 		Subjects: []string{name + ".>"},
 		MaxAge:   maxage,
 	}
-	jsinfo, err := nh.js.AddStream(conf)
+	_, err := nh.js.AddStream(conf)
 
 	if err != nil {
-		jsinfo, _ = nh.js.UpdateStream(conf)
+		_, _ = nh.js.UpdateStream(conf)
 	}
 
-	bytes, _ := json.MarshalIndent(jsinfo, "", " ")
+	//bytes, _ := json.MarshalIndent(jsinfo, "", " ")
 	log.Println("Initialized stream  " + name)
-	log.Println(string(bytes))
+	//log.Println(string(bytes))
 
 	return nil
 }

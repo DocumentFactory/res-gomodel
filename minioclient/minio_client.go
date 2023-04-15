@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"path"
 
-	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/pnocera/res-gomodel/config"
@@ -126,21 +125,19 @@ func (c *MinioClient) BucketExists(ctx context.Context, runid string) (bool, err
 	return found, nil
 }
 
-func (c *MinioClient) Upload(ctx context.Context, runid string, contenttype string, reader io.ReadSeeker) (int64, string, error) {
-
-	newid := gonanoid.Must()
+func (c *MinioClient) Upload(ctx context.Context, runid string, id string, contenttype string, reader io.ReadSeeker) (int64, error) {
 
 	found, err := c.BucketExists(ctx, runid)
 
 	if LogError(err) != nil {
-		return 0, "", err
+		return 0, err
 	}
 
 	if !found {
 		// create new bucket with default ACL in default region
 		err = c.client.MakeBucket(ctx, runid, minio.MakeBucketOptions{})
 		if LogError(err) != nil {
-			return 0, "", err
+			return 0, err
 		}
 	}
 
@@ -150,7 +147,7 @@ func (c *MinioClient) Upload(ctx context.Context, runid string, contenttype stri
 
 	size, err := reader.Seek(0, io.SeekEnd)
 	if LogError(err) != nil {
-		return 0, "", err
+		return 0, err
 	}
 
 	opts := minio.PutObjectOptions{StorageClass: "STANDARD"}
@@ -169,18 +166,18 @@ func (c *MinioClient) Upload(ctx context.Context, runid string, contenttype stri
 
 	_, err = reader.Seek(0, io.SeekStart)
 	if LogError(err) != nil {
-		return 0, "", err
+		return 0, err
 	}
 
-	info, err := c.client.PutObject(ctx, runid, newid, reader, size, opts)
+	info, err := c.client.PutObject(ctx, runid, id, reader, size, opts)
 
 	if LogError(err) != nil {
-		return 0, "", err
+		return 0, err
 	}
 
-	log.Printf("Uploaded %s of size %d to bucket %s with version %s", newid, info.Size, runid, info.VersionID)
+	log.Printf("Uploaded %s of size %d to bucket %s with version %s", id, info.Size, runid, info.VersionID)
 
-	return info.Size, newid, nil
+	return info.Size, nil
 }
 
 func (c *MinioClient) Download(ctx context.Context, runid string, id string) (io.ReadCloser, error) {

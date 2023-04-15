@@ -70,7 +70,6 @@ require (
 require (
 	github.com/dapr/go-sdk v1.7.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
-	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/minio/minio-go/v7 v7.0.52
 	github.com/nats-io/nkeys v0.4.4 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
