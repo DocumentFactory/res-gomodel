@@ -125,21 +125,19 @@ func (c *MinioClient) BucketExists(ctx context.Context, runid string) (bool, err
 	return found, nil
 }
 
-func (c *MinioClient) Upload(ctx context.Context, runid string, id string, contenttype string, reader io.ReadSeeker) (int64, error) {
-
-	found, err := c.BucketExists(ctx, runid)
-
-	if LogError(err) != nil {
-		return 0, err
-	}
+func (c *MinioClient) GetOrCreateBucket(ctx context.Context, runid string) {
+	found, _ := c.client.BucketExists(ctx, runid)
 
 	if !found {
 		// create new bucket with default ACL in default region
-		err = c.client.MakeBucket(ctx, runid, minio.MakeBucketOptions{})
-		if LogError(err) != nil {
-			return 0, err
-		}
+		_ = c.client.MakeBucket(ctx, runid, minio.MakeBucketOptions{})
+
 	}
+}
+
+func (c *MinioClient) Upload(ctx context.Context, runid string, id string, contenttype string, reader io.ReadSeeker) (int64, error) {
+
+	c.GetOrCreateBucket(ctx, runid)
 
 	if contenttype == "" {
 		contenttype = "application/octet-stream"
@@ -182,15 +180,7 @@ func (c *MinioClient) Upload(ctx context.Context, runid string, id string, conte
 
 func (c *MinioClient) Download(ctx context.Context, runid string, id string) (io.ReadCloser, error) {
 
-	found, err := c.BucketExists(ctx, runid)
-
-	if LogError(err) != nil {
-		return nil, err
-	}
-
-	if !found {
-		return nil, errors.New("bucket not found")
-	}
+	c.GetOrCreateBucket(ctx, runid)
 
 	obj, err := c.client.GetObject(ctx, runid, id, minio.GetObjectOptions{})
 
@@ -203,17 +193,7 @@ func (c *MinioClient) Download(ctx context.Context, runid string, id string) (io
 
 func (c *MinioClient) Delete(ctx context.Context, runid string, id string) error {
 
-	found, err := c.BucketExists(ctx, runid)
-
-	if LogError(err) != nil {
-		return err
-	}
-
-	if !found {
-		return errors.New("bucket not found")
-	}
-
-	err = c.client.RemoveObject(ctx, runid, id, minio.RemoveObjectOptions{})
+	err := c.client.RemoveObject(ctx, runid, id, minio.RemoveObjectOptions{})
 
 	if LogError(err) != nil {
 		return err
@@ -224,11 +204,7 @@ func (c *MinioClient) Delete(ctx context.Context, runid string, id string) error
 
 func (c *MinioClient) DeleteBucket(ctx context.Context, runid string) error {
 
-	found, err := c.BucketExists(ctx, runid)
-
-	if LogError(err) != nil {
-		return err
-	}
+	found, _ := c.client.BucketExists(ctx, runid)
 
 	if !found {
 		return nil
@@ -257,7 +233,7 @@ func (c *MinioClient) DeleteBucket(ctx context.Context, runid string) error {
 		}
 	}
 
-	err = c.client.RemoveBucket(ctx, runid)
+	err := c.client.RemoveBucket(ctx, runid)
 
 	if LogError(err) != nil {
 		return err
