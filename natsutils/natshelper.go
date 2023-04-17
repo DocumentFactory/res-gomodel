@@ -51,6 +51,7 @@ func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
 	c.addStream("feedback", 30*time.Second)
 	c.addStream("tasks", 32*time.Minute)
 	c.addStream("cancel", 30*time.Second)
+	c.addStream("cleanup", 30*time.Second)
 
 	// c.store, err = js.ObjectStore("tempfiles")
 	// if err != nil {
