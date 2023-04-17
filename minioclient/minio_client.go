@@ -231,7 +231,30 @@ func (c *MinioClient) DeleteBucket(ctx context.Context, runid string) error {
 	}
 
 	if !found {
-		return errors.New("bucket not found")
+		return nil
+	}
+
+	objectsCh := make(chan minio.ObjectInfo)
+
+	go func() {
+		defer close(objectsCh)
+
+		// List all objects from a bucket-name with a matching prefix.
+		for object := range c.client.ListObjects(ctx, runid, minio.ListObjectsOptions{Recursive: true}) {
+			if object.Err != nil {
+				return
+			}
+
+			objectsCh <- object
+		}
+	}()
+
+	errChn := c.client.RemoveObjects(ctx, runid, objectsCh, minio.RemoveObjectsOptions{})
+
+	for rmObjErr := range errChn {
+		if LogError(rmObjErr.Err) != nil {
+			return rmObjErr.Err
+		}
 	}
 
 	err = c.client.RemoveBucket(ctx, runid)
