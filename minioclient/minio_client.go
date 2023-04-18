@@ -342,6 +342,41 @@ func (c *MinioClient) DeleteBucket(ctx context.Context, runid string) error {
 	return nil
 }
 
+func (c *MinioClient) ListBuckets(ctx context.Context) ([]minio.BucketInfo, error) {
+	return c.client.ListBuckets(ctx)
+
+}
+
+func (c *MinioClient) ListObjects(ctx context.Context, runid string, prefix string, maxkeys int) ([]minio.ObjectInfo, error) {
+
+	objectsCh := make(chan minio.ObjectInfo)
+
+	errorchan := make(chan error)
+
+	go func() {
+		defer close(objectsCh)
+
+		// List all objects from a bucket-name with a matching prefix.
+		for object := range c.client.ListObjects(ctx, runid, minio.ListObjectsOptions{Prefix: prefix, Recursive: false, MaxKeys: maxkeys}) {
+			if object.Err != nil {
+				errorchan <- object.Err
+			} else {
+				objectsCh <- object
+			}
+
+		}
+	}()
+
+	var objects []minio.ObjectInfo
+
+	for object := range objectsCh {
+		objects = append(objects, object)
+	}
+
+	return objects, nil
+
+}
+
 func (c *MinioClient) CopyTo(ctx context.Context, runid string, id string, accesskeyid string, accesskey string, region string, destbucket string, dest string, endpoint string) (int64, error) {
 
 	reader, err := c.Download(ctx, runid, id)
