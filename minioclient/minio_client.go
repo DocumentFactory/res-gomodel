@@ -49,6 +49,57 @@ func Join(p ...string) string {
 	return path.Join(p...)
 }
 
+func NewMinioClientFromSpec(endpoint string, accessKeyID string, accessKey string, region string, insecureTLS bool) (*MinioClient, error) {
+
+	cfg := config.New()
+	minio.MaxRetry = 10
+
+	creds := credentials.NewChainCredentials([]credentials.Provider{
+		&credentials.Static{
+			Value: credentials.Value{
+				AccessKeyID:     accessKeyID,
+				SecretAccessKey: accessKey,
+			},
+		},
+	})
+
+	c, err := creds.Get()
+	if LogError(err) != nil {
+		return nil, err
+	}
+
+	if c.SignerType == credentials.SignatureAnonymous {
+		log.Printf("using anonymous access for %#v", endpoint)
+	}
+
+	tr, err := Transport(TransportOptions{
+		InsecureTLS: insecureTLS,
+	})
+
+	if LogError(err) != nil {
+		return nil, err
+	}
+
+	options := &minio.Options{
+		Creds:        creds,
+		Secure:       !insecureTLS,
+		Region:       region,
+		Transport:    tr,
+		BucketLookup: minio.BucketLookupAuto,
+	}
+
+	client, err := minio.New(endpoint, options)
+	if LogError(err) != nil {
+		return nil, err
+	}
+
+	return &MinioClient{
+		client:         client,
+		cfg:            cfg,
+		size_treshhold: cfg.GetInt("MINIO_SIZE_TRESHHOLD", 30*1024*1024),
+	}, nil
+}
+
 func NewMinioClient(cfg *config.Config) (*MinioClient, error) {
 	endpoint := cfg.GetString("MINIO_ENDPOINT", "")
 	accessKeyID := cfg.GetString("MINIO_ACCESSKEY_ID", "")
