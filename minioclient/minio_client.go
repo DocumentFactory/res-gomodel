@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"path"
 
 	"github.com/minio/minio-go/v7"
@@ -180,7 +181,7 @@ func (c *MinioClient) Upload(ctx context.Context, runid string, id string, conte
 
 func (c *MinioClient) Download(ctx context.Context, runid string, id string) (io.ReadCloser, error) {
 
-	c.GetOrCreateBucket(ctx, runid)
+	//c.GetOrCreateBucket(ctx, runid)
 
 	obj, err := c.client.GetObject(ctx, runid, id, minio.GetObjectOptions{})
 
@@ -189,6 +190,54 @@ func (c *MinioClient) Download(ctx context.Context, runid string, id string) (io
 	}
 
 	return obj, nil
+}
+
+func (c *MinioClient) DownloadFile(ctx context.Context, runid string, id string, filename string) (int64, error) {
+
+	reader, err := c.Download(ctx, runid, id)
+
+	if LogError(err) != nil {
+		return 0, err
+	}
+
+	defer reader.Close()
+
+	localfoldername := path.Join("/img/", runid)
+
+	err = os.MkdirAll(localfoldername, os.ModePerm)
+
+	if LogError(err) != nil {
+		return 0, err
+	}
+
+	filepath := path.Join(localfoldername, filename)
+
+	file, err := os.Create(filepath)
+	if LogError(err) != nil {
+		return 0, err
+	}
+
+	defer file.Close()
+
+	size, err := io.Copy(file, reader)
+	if LogError(err) != nil {
+		return 0, err
+	}
+
+	return size, nil
+}
+
+func (c *MinioClient) UploadFile(ctx context.Context, runid string, id string, contenttype string, fullfilename string) (int64, error) {
+
+	file, err := os.Open(fullfilename)
+	if LogError(err) != nil {
+		return 0, err
+	}
+
+	defer file.Close()
+
+	return c.Upload(ctx, runid, id, contenttype, file)
+
 }
 
 func (c *MinioClient) Delete(ctx context.Context, runid string, id string) error {
