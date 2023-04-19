@@ -121,8 +121,9 @@ func (nh *NatsHelper) WatchWfKV(fn WatchKVHandler) error {
 	if err != nil {
 		return err
 	}
-	defer w.Stop()
+
 	go func() {
+
 		for kve := range w.Updates() {
 			if kve != nil {
 				fn(context.Background(), kve.Value())
@@ -229,5 +230,23 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 			return err
 		}
 	}
+	return nil
+}
+
+func (nh *NatsHelper) AddWatchKVHandler(kv string, fn WatchKVHandler) error {
+
+	var err error
+	_, err = nh.js.Subscribe(kv, func(msg *nats.Msg) {
+		msg.Ack()
+		ctx := context.Background()
+		err = fn(ctx, msg.Data)
+		if err != nil {
+			log.Printf("Error processing message %v", err)
+		}
+	})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
