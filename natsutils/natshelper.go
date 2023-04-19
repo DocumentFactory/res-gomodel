@@ -74,7 +74,7 @@ func (nh *NatsHelper) addKV(name string, maxage time.Duration) error {
 	} else {
 		kv, err = nh.js.KeyValue(name)
 	}
-	if err != nil {
+	if err == nil {
 		log.Println("Initialized kv store  " + name)
 		nh.wfkv = kv
 	}
