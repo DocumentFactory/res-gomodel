@@ -127,7 +127,9 @@ func (nh *NatsHelper) GetWfKVAll() ([]types.WFKeyVal, error) {
 			var keyval types.WFKeyVal
 			err = json.Unmarshal(msg.Value(), &keyval)
 			if err != nil {
-				result = append(result, keyval)
+				if keyval.Status > 0 {
+					result = append(result, keyval)
+				}
 			}
 		}
 	}
