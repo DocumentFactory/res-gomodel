@@ -21,7 +21,7 @@ type NatsHelper struct {
 
 type SubscribeInvocationHandler func(ctx context.Context, msg *nats.Msg) error
 
-type WatchKVHandler func(ctx context.Context, value []byte) error
+type WatchKVHandler func(ctx context.Context, value nats.KeyValueEntry) error
 
 // New Create a new NatsHelper
 func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
@@ -98,9 +98,14 @@ func (nh *NatsHelper) addStream(name string, maxage time.Duration) error {
 	return nil
 }
 
-func (nh *NatsHelper) PutWfKV(subject string, payload interface{}) error {
+func (nh *NatsHelper) PutWfKV(runid string, payload interface{}) error {
 	messagejson, _ := json.Marshal(payload)
-	_, err := nh.wfkv.Put(subject, messagejson)
+	_, err := nh.wfkv.Put(runid, messagejson)
+
+	if err != nil {
+		log.Printf("Error put workflow %s, error : %v", runid, err)
+	}
+
 	return err
 }
 
@@ -126,7 +131,7 @@ func (nh *NatsHelper) WatchWfKV(fn WatchKVHandler) error {
 
 		for kve := range w.Updates() {
 			if kve != nil {
-				fn(context.Background(), kve.Value())
+				fn(context.Background(), kve)
 			}
 		}
 	}()
@@ -233,20 +238,20 @@ func (nh *NatsHelper) AddSubscribeHandler(pool string, poolsize int, subject str
 	return nil
 }
 
-func (nh *NatsHelper) AddWatchKVHandler(kv string, fn WatchKVHandler) error {
+// func (nh *NatsHelper) AddWatchKVHandler(kv string, fn WatchKVHandler) error {
 
-	var err error
-	_, err = nh.js.Subscribe(kv, func(msg *nats.Msg) {
-		msg.Ack()
-		ctx := context.Background()
-		err = fn(ctx, msg.Data)
-		if err != nil {
-			log.Printf("Error processing message %v", err)
-		}
-	})
-	if err != nil {
-		return err
-	}
+// 	var err error
+// 	_, err = nh.js.Subscribe(kv, func(msg *nats.Msg) {
+// 		msg.Ack()
+// 		ctx := context.Background()
+// 		err = fn(ctx, msg.Data)
+// 		if err != nil {
+// 			log.Printf("Error processing message %v", err)
+// 		}
+// 	})
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
