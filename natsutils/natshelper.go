@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 	"github.com/pnocera/res-gomodel/config"
+	"github.com/pnocera/res-gomodel/types"
 )
 
 type NatsHelper struct {
@@ -98,7 +99,7 @@ func (nh *NatsHelper) addStream(name string, maxage time.Duration) error {
 	return nil
 }
 
-func (nh *NatsHelper) PutWfKV(runid string, payload interface{}) error {
+func (nh *NatsHelper) PutWfKV(runid string, payload types.WFKeyVal) error {
 	messagejson, _ := json.Marshal(payload)
 	_, err := nh.wfkv.Put(runid, messagejson)
 
@@ -109,12 +110,42 @@ func (nh *NatsHelper) PutWfKV(runid string, payload interface{}) error {
 	return err
 }
 
-func (nh *NatsHelper) GetWfKV(key string) ([]byte, error) {
+func (nh *NatsHelper) GetWfKVAll() ([]types.WFKeyVal, error) {
+	var result []types.WFKeyVal
+
+	var err error
+
+	keys, err := nh.wfkv.Keys()
+
+	if err != nil {
+		return result, err
+	}
+
+	for _, key := range keys {
+		msg, _ := nh.wfkv.Get(key)
+		if msg != nil {
+			var keyval types.WFKeyVal
+			err = json.Unmarshal(msg.Value(), &keyval)
+			if err != nil {
+				result = append(result, keyval)
+			}
+		}
+	}
+
+	return result, err
+}
+
+func (nh *NatsHelper) GetWfKV(key string) (*types.WFKeyVal, error) {
 	msg, err := nh.wfkv.Get(key)
 	if err != nil {
 		return nil, err
 	}
-	return msg.Value(), nil
+	var keyval types.WFKeyVal
+	err = json.Unmarshal(msg.Value(), &keyval)
+	if err != nil {
+		return nil, err
+	}
+	return &keyval, nil
 }
 
 func (nh *NatsHelper) DeleteWfKV(key string) error {
