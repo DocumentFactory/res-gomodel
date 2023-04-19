@@ -16,13 +16,12 @@ type NatsHelper struct {
 	conf *config.Config
 	nc   *nats.Conn
 	js   nats.JetStreamContext
-	// subs  []*nats.Subscription
-	// store nats.ObjectStore
+	kv   nats.KeyValue
 }
 
 type SubscribeInvocationHandler func(ctx context.Context, msg *nats.Msg) error
 
-type CancelWorkflowHandler func(ctx context.Context, msg *nats.Msg) bool
+type WatchKVHandler func(ctx context.Context, value []byte) error
 
 // New Create a new NatsHelper
 func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
@@ -53,18 +52,7 @@ func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
 	c.addStream("cancel", 30*time.Second)
 	c.addStream("cleanup", 30*time.Second)
 
-	// c.store, err = js.ObjectStore("tempfiles")
-	// if err != nil {
-
-	// 	c.store, err = c.js.CreateObjectStore(&nats.ObjectStoreConfig{
-	// 		Bucket:      "tempfiles",
-	// 		Description: "Temporary files",
-	// 		TTL:         30 * time.Second,
-	// 		MaxBytes:    1024 * 1024 * 1024 * 1024,
-	// 		Storage:     nats.FileStorage,
-	// 		Replicas:    1,
-	// 	})
-	// }
+	err = c.addKV("workflows", 120*time.Minute)
 
 	if err != nil {
 		return nil, err
@@ -73,71 +61,25 @@ func NewNatsHelper(conf *config.Config) (*NatsHelper, error) {
 	return &c, nil
 }
 
-// func (nh *NatsHelper) PutBytes(key string, data []byte) (*nats.ObjectInfo, error) {
-
-// 	return nh.store.PutBytes(key, data)
-
-// }
-
-// func (nh *NatsHelper) Put(name string, masterkey string, reader io.Reader) ([32]byte, error) {
-// 	nonce, err := GetNonce()
-// 	if err != nil {
-// 		return [32]byte{}, err
-// 	}
-
-// 	key, err := GetKey(masterkey, nonce)
-// 	if err != nil {
-// 		return [32]byte{}, err
-// 	}
-
-// 	encrypted, err := sio.EncryptReader(reader, sio.Config{Key: key[:]})
-// 	if err != nil {
-// 		return [32]byte{}, err
-// 	}
-
-// 	_, err = nh.store.Put(&nats.ObjectMeta{
-// 		Name: name,
-// 	}, encrypted)
-
-// 	if err != nil {
-// 		return [32]byte{}, err
-// 	}
-
-// 	return nonce, nil
-
-// }
-
-// func (nh *NatsHelper) GetBytes(key string) ([]byte, error) {
-
-// 	return nh.store.GetBytes(key)
-
-// }
-
-// func (nh *NatsHelper) Get(masterkey string, nonce [32]byte, name string) (io.Reader, error) {
-
-// 	key, err := GetKey(masterkey, nonce)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	obj, err := nh.store.Get(name)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	decrypted, err := sio.DecryptReader(obj, sio.Config{Key: key[:]})
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return decrypted, nil
-// }
-
-// func (nh *NatsHelper) Delete(key string) error {
-
-// 	return nh.store.Delete(key)
-
-// }
+func (nh *NatsHelper) addKV(name string, maxage time.Duration) error {
+	var kv nats.KeyValue
+	var err error
+	if stream, _ := nh.js.StreamInfo(name); stream == nil {
+		// A key-value (KV) bucket is created by specifying a bucket name.
+		kv, err = nh.js.CreateKeyValue(&nats.KeyValueConfig{
+			Bucket:  name,
+			History: 5,
+			TTL:     maxage,
+		})
+	} else {
+		kv, err = nh.js.KeyValue(name)
+	}
+	if err != nil {
+		log.Println("Initialized kv store  " + name)
+		nh.kv = kv
+	}
+	return err
+}
 
 func (nh *NatsHelper) addStream(name string, maxage time.Duration) error {
 	conf := &nats.StreamConfig{
@@ -151,10 +93,42 @@ func (nh *NatsHelper) addStream(name string, maxage time.Duration) error {
 		_, _ = nh.js.UpdateStream(conf)
 	}
 
-	//bytes, _ := json.MarshalIndent(jsinfo, "", " ")
 	log.Println("Initialized stream  " + name)
-	//log.Println(string(bytes))
 
+	return nil
+}
+
+func (nh *NatsHelper) PutKV(subject string, payload interface{}) error {
+	messagejson, _ := json.Marshal(payload)
+	_, err := nh.kv.Put(subject, messagejson)
+	return err
+}
+
+func (nh *NatsHelper) GetKV(key string) ([]byte, error) {
+	msg, err := nh.kv.Get(key)
+	if err != nil {
+		return nil, err
+	}
+	return msg.Value(), nil
+}
+
+func (nh *NatsHelper) DeleteKV(key string) error {
+	return nh.kv.Delete(key)
+}
+
+func (nh *NatsHelper) WatchKV(subject string, fn WatchKVHandler) error {
+	w, err := nh.kv.WatchAll()
+	if err != nil {
+		return err
+	}
+	defer w.Stop()
+	go func() {
+		for kve := range w.Updates() {
+			if kve != nil {
+				fn(context.Background(), kve.Value())
+			}
+		}
+	}()
 	return nil
 }
 
