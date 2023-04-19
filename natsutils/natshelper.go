@@ -16,7 +16,7 @@ type NatsHelper struct {
 	conf *config.Config
 	nc   *nats.Conn
 	js   nats.JetStreamContext
-	kv   nats.KeyValue
+	wfkv nats.KeyValue
 }
 
 type SubscribeInvocationHandler func(ctx context.Context, msg *nats.Msg) error
@@ -76,7 +76,7 @@ func (nh *NatsHelper) addKV(name string, maxage time.Duration) error {
 	}
 	if err != nil {
 		log.Println("Initialized kv store  " + name)
-		nh.kv = kv
+		nh.wfkv = kv
 	}
 	return err
 }
@@ -98,26 +98,26 @@ func (nh *NatsHelper) addStream(name string, maxage time.Duration) error {
 	return nil
 }
 
-func (nh *NatsHelper) PutKV(subject string, payload interface{}) error {
+func (nh *NatsHelper) PutWfKV(subject string, payload interface{}) error {
 	messagejson, _ := json.Marshal(payload)
-	_, err := nh.kv.Put(subject, messagejson)
+	_, err := nh.wfkv.Put(subject, messagejson)
 	return err
 }
 
-func (nh *NatsHelper) GetKV(key string) ([]byte, error) {
-	msg, err := nh.kv.Get(key)
+func (nh *NatsHelper) GetWfKV(key string) ([]byte, error) {
+	msg, err := nh.wfkv.Get(key)
 	if err != nil {
 		return nil, err
 	}
 	return msg.Value(), nil
 }
 
-func (nh *NatsHelper) DeleteKV(key string) error {
-	return nh.kv.Delete(key)
+func (nh *NatsHelper) DeleteWfKV(key string) error {
+	return nh.wfkv.Delete(key)
 }
 
-func (nh *NatsHelper) WatchKV(subject string, fn WatchKVHandler) error {
-	w, err := nh.kv.WatchAll()
+func (nh *NatsHelper) WatchWfKV(fn WatchKVHandler) error {
+	w, err := nh.wfkv.WatchAll()
 	if err != nil {
 		return err
 	}
