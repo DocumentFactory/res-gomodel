@@ -2,6 +2,6 @@ package types
 
 type WFKeyVal struct {
 	RUNID        string `json:"runid"`
-	InstanceType int    `json:"instancetype"`
+	InstanceType string `json:"instancetype"`
 	Status       int    `json:"status"`
 }
