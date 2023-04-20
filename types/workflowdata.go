@@ -10,7 +10,7 @@ type WorkflowData struct {
 	BaseUrl         string     `json:"baseurl"`
 	WFID            string     `json:"wfid"`
 	RUNID           string     `json:"runid"`
-	InstanceType    int        `json:"instancetype"`
+	InstanceType    string     `json:"instancetype"`
 	TotalSize       uint64     `json:"totalsize"`
 	NumDocs         int        `json:"numdocs"`
 	HasMerge        bool       `json:"hasmerge"`
@@ -25,7 +25,7 @@ type WorkflowInfo struct {
 	BaseUrl         string `json:"baseurl"`
 	WFID            string `json:"wfid"`
 	RUNID           string `json:"runid"`
-	InstanceType    int    `json:"instancetype"`
+	InstanceType    string `json:"instancetype"`
 	TotalSize       uint64 `json:"totalsize"`
 	NumDocs         int    `json:"numdocs"`
 	HasMerge        bool   `json:"hasmerge"`
