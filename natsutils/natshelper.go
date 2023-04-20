@@ -118,6 +118,7 @@ func (nh *NatsHelper) GetWfKVAll() ([]types.WFKeyVal, error) {
 	keys, err := nh.wfkv.Keys()
 
 	if err != nil {
+		log.Printf("Error get workflow keys, error : %v", err)
 		return result, err
 	}
 
@@ -126,11 +127,13 @@ func (nh *NatsHelper) GetWfKVAll() ([]types.WFKeyVal, error) {
 		if msg != nil {
 			var keyval types.WFKeyVal
 			err = json.Unmarshal(msg.Value(), &keyval)
-			if err != nil {
+			if err == nil {
 				if keyval.Status > 0 {
 					result = append(result, keyval)
 				}
 			}
+		} else {
+			log.Printf("Error get workflow %s, error : %v", key, err)
 		}
 	}
 
