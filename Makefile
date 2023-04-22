@@ -1,5 +1,5 @@
 
-VERSION=v0.3.11
+VERSION=v0.3.12
 
 gen:
 	cd proto && \
