@@ -33,6 +33,7 @@ require (
 	github.com/hashicorp/go-secure-stdlib/strutil v0.1.2 // indirect
 	github.com/hashicorp/go-sockaddr v1.0.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.16.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
@@ -68,8 +69,10 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go v1.44.248
 	github.com/dapr/go-sdk v1.7.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
+	github.com/iafan/cwalk v0.0.0-20210125030640-586a8832a711
 	github.com/minio/minio-go/v7 v7.0.52
 	github.com/nats-io/nkeys v0.4.4 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
