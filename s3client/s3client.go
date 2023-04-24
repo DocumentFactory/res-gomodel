@@ -30,8 +30,17 @@ func LogError(err error) error {
 
 func NewS3ClientFromSpec(endpoint string, accessKeyID string, accessKey string, region string, insecureTLS bool) (*S3Client, error) {
 	cfg := config.New()
+	if insecureTLS {
+		endpoint = "http://" + endpoint
+	} else {
+		endpoint = "https://" + endpoint
+	}
+
 	session := getAwsSession(endpoint, accessKeyID, accessKey, region)
-	svc := s3.New(session)
+	svc := s3.New(session, &aws.Config{
+		MaxRetries: aws.Int(30),
+		Region:     aws.String(region),
+	})
 
 	return &S3Client{
 		session: session,
@@ -45,30 +54,20 @@ func NewS3Client(cfg *config.Config) (*S3Client, error) {
 	endpoint := cfg.GetString("MINIO_ENDPOINT", "")
 	accessKeyID := cfg.GetString("MINIO_ACCESSKEY_ID", "")
 	accessKey := cfg.GetString("MINIO_ACCESSKEY", "")
-	// insecureTLS := cfg.GetBool("MINIO_INSECURE")
+	insecureTLS := cfg.GetBool("MINIO_INSECURE")
 	region := cfg.GetString("MINIO_REGION", "")
 
-	session := getAwsSession(endpoint, accessKeyID, accessKey, region)
-	svc := s3.New(session)
-
-	return &S3Client{
-		session: session,
-		region:  region,
-		cfg:     cfg,
-		svc:     svc,
-	}, nil
+	return NewS3ClientFromSpec(endpoint, accessKeyID, accessKey, region, insecureTLS)
 }
 
 func (c *S3Client) BucketExists(ctx context.Context, runid string) (bool, error) {
 
-	result, err := c.svc.GetBucketLocation(&s3.GetBucketLocationInput{
+	_, err := c.svc.GetBucketLocation(&s3.GetBucketLocationInput{
 		Bucket: aws.String(runid),
 	})
 	if err != nil {
 		return false, err
 	}
-	c.svc = s3.New(c.session, &aws.Config{MaxRetries: aws.Int(30),
-		Region: aws.String(s3.NormalizeBucketLocation(*result.LocationConstraint))})
 
 	return true, nil
 

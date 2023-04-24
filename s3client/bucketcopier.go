@@ -531,7 +531,7 @@ func NewBucketCopier(detectRegion bool, source string, dest string, threads int,
 
 	}
 
-	template.Bucket = aws.String(destURL.Host)
+	//template.Bucket = aws.String(destURL.Host)
 
 	cp := &BucketCopier{
 		source:    *sourceURL,
