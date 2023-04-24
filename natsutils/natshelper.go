@@ -111,7 +111,7 @@ func (nh *NatsHelper) PutWfKV(runid string, payload types.WFKeyVal) error {
 }
 
 func (nh *NatsHelper) GetWfKVAll() ([]types.WFKeyVal, error) {
-	var result []types.WFKeyVal
+	var result []types.WFKeyVal = make([]types.WFKeyVal, 0)
 
 	var err error
 
